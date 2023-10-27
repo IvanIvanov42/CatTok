@@ -10,34 +10,36 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  ivancho-build:
     runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v4
-      - working-directory: ivancho
-
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v1
+        working-directory: ivancho
         with:
           dotnet-version: '7.x'
           include-prerelease: true
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
+        working-directory: ivancho
 
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        working-directory: ivancho
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
+        working-directory: ivancho
         with:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
 
-  deploy:
+  ivancho-deploy:
     runs-on: windows-latest
-    needs: build
+    needs: ivancho-build
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
@@ -46,12 +48,14 @@ jobs:
       - working-directory: ivancho
       - name: Download artifact from build job
         uses: actions/download-artifact@v3
+        working-directory: ivancho
         with:
           name: .net-app
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
+        working-directory: ivancho
         with:
           app-name: 'Expatery-First-Version'
           slot-name: 'Production'
