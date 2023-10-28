@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  expatery-api-build:
     runs-on: windows-latest
 
     steps:
@@ -24,9 +24,11 @@ jobs:
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
+        working-directory: ./Expatery-API
 
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        working-directory: ./Expatery-API
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
@@ -34,9 +36,9 @@ jobs:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
 
-  deploy:
+  expatery-api-deploy:
     runs-on: windows-latest
-    needs: build
+    needs: expatery-api-build
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
