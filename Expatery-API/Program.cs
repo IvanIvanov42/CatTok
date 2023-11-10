@@ -3,9 +3,20 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+builder.Services.AddHttpClient<InstagramService>();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Read the Instagram access token from the configuration file
+var configuration = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json", optional: false)
+    .AddJsonFile("appsettings.secret.json", optional: true) // Add this line
+    .Build();
+
+string instagramAccessToken = configuration["InstagramAccessToken"];
 
 var app = builder.Build();
 
@@ -19,6 +30,13 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+// Pass the Instagram access token to the InstagramService
+app.Use((context, next) =>
+{
+    context.Items["InstagramAccessToken"] = instagramAccessToken;
+    return next();
+});
 
 app.MapControllers();
 
