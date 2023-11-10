@@ -11,7 +11,7 @@ public class InstagramService
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
     }
 
-    public async Task<string> GetInstagramDataAsync(string accessToken)
+    public async Task<string?> GetInstagramDataAsync(string accessToken)
     {
         string apiUrl = $"https://graph.instagram.com/me/media?fields=id&access_token={accessToken}";
 
