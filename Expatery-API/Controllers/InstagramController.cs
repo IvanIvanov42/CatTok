@@ -19,7 +19,7 @@ namespace Expatery_API.Controllers
         [HttpGet("GetInstagramData")]
         public async Task<IActionResult> GetInstagramData()
         {
-            string accessToken = HttpContext.Items["InstagramAccessToken"] as string;
+            string? accessToken = HttpContext.Items["InstagramAccessToken"] as string;
 
             if (string.IsNullOrEmpty(accessToken))
             {
@@ -30,13 +30,14 @@ namespace Expatery_API.Controllers
             // Use the access token in your InstagramService
             try
             {
-                var instagramData = await _instagramService.GetInstagramDataAsync("YOUR_ENDPOINT", accessToken);
+                var instagramData = await _instagramService.GetInstagramDataAsync(accessToken);
                 // Process the Instagram data as needed
                 return Ok(instagramData);
             }
             catch (Exception ex)
             {
                 // Log the exception
+                Console.WriteLine(ex);
                 return StatusCode(500, "Internal Server Error");
             }
         }
