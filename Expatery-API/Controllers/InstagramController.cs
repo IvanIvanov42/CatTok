@@ -35,16 +35,20 @@ namespace Expatery_API.Controllers
                 List<string> listOfIds = new List<string>();
                 var instagramData = await _instagramService.GetInstagramDataAsync(accessToken);
 
-                // Deserialize the Instagram API response
-                InstagramResponseModel? responseModel =
-                JsonSerializer.Deserialize<InstagramResponseModel>(instagramData);
-                foreach(var item in responseModel.data )
+                InstagramResponseModel? responseModel = JsonSerializer.Deserialize<InstagramResponseModel>(instagramData);
+
+                if (responseModel != null)
                 {
-                    listOfIds.Add(item.id);
+                    listOfIds.AddRange(responseModel.data.Select(item => item.id));
+
+                    // Call the new method to get media details
+                    List<Media> mediaList = await _instagramService.GetMediaDetailsAsync(listOfIds, accessToken);
+
+                    // Process the mediaList as needed
+                    return Ok(mediaList);
                 }
 
-                // Process the Instagram data as needed
-                return Ok(instagramData);
+                return StatusCode(500, "Failed to retrieve Instagram data.");
             }
             catch (Exception ex)
             {

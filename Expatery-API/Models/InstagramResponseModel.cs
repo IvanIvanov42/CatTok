@@ -21,4 +21,13 @@
         public string before { get; set; }
         public string after { get; set; }
     }
+
+    public class Media
+    {
+        public string id { get; set; }
+        public string media_type { get; set; }
+        public string media_url { get; set; }
+        public string username { get; set; }
+        public string timestamp { get; set; }
+    }
 }
