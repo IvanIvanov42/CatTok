@@ -1,3 +1,7 @@
+using Expatery_API.Models;
+using Expatery_API.Services;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -17,6 +21,14 @@ var configuration = new ConfigurationBuilder()
     .Build();
 
 string instagramAccessToken = configuration["InstagramAccessToken"];
+string azureSqlConnection = configuration.GetConnectionString("Billie-Jean-TV-SQL");
+
+
+builder.Services.AddDbContext<InstagramDataStorageDbContext>(options =>
+    options.UseSqlServer(azureSqlConnection));
+
+
+builder.Services.AddScoped<IInstagramDataStorage, DatabaseInstagramDataStorage>();
 
 var app = builder.Build();
 

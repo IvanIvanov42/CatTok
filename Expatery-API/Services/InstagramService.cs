@@ -1,8 +1,5 @@
 ﻿using Expatery_API.Models;
-using System;
-using System.Net.Http;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 public class InstagramService
 {
@@ -13,9 +10,9 @@ public class InstagramService
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
     }
 
-    public async Task<string?> GetInstagramDataAsync(string accessToken)
+    public async Task<string?> GetInstagramDataAsync(string accessToken, string latestTimestamp)
     {
-        string apiUrl = $"https://graph.instagram.com/me/media?fields=id&access_token={accessToken}";
+        string apiUrl = $"https://graph.instagram.com/me/media?fields=id,timestamp&since={latestTimestamp}&access_token={accessToken}";
 
         HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
 
@@ -47,8 +44,14 @@ public class InstagramService
             {
                 Console.WriteLine($"Failed to fetch media details for ID: {id}. Status Code: {mediaResponse.StatusCode}");
             }
-
         }
         return mediaList;
+    }
+
+    public async Task UpdateLatestTimeStampAsync(InstagramDataStorageDbContext dbContext, string newTimestamp)
+    {
+        var timeStamp = new InstagramTimeStamp { LatestTimeStamp = newTimestamp };
+        dbContext.InstagramTimeStamps.Add(timeStamp);
+        await dbContext.SaveChangesAsync();
     }
 }
