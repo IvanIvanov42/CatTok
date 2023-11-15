@@ -56,7 +56,7 @@ jobs:
         uses: azure/sql-action@v2
         with:
           connection-string: ${{ secrets.AZURE_SQL_DB_BILLIE }}
-          path: './Database.dacpac'
+          path: './Billie-Jean-TV.dacpac'
           action: 'Publish'
 
       - name: Deploy to Azure Web App
