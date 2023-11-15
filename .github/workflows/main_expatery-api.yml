@@ -47,6 +47,13 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
+      - uses: actions/checkout@v4
+      
+      - name: Login to Azure to deploy
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }} 
+          
       - name: Download artifact from build job
         uses: actions/download-artifact@v3
         with:
@@ -54,6 +61,7 @@ jobs:
 
       - name: Deploy to Azure SQL
         uses: azure/sql-action@v2
+        
         with:
           connection-string: ${{ secrets.AZURE_SQL_DB_BILLIE }}
           path: 'Billie-Jean-TV.dacpac'
