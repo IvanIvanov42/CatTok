@@ -8,7 +8,7 @@ on:
 
 jobs:
   expatery-api-build:
-    runs-on: windows-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout code
@@ -40,7 +40,7 @@ jobs:
           path: ${{env.DOTNET_ROOT}}/myapp
         
   expatery-api-deploy:
-    runs-on: windows-latest
+    runs-on: self-hosted
     needs: expatery-api-build
     environment:
       name: 'Production'
