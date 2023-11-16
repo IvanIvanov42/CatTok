@@ -38,12 +38,6 @@ jobs:
         with:
           name: dotnet-app
           path: ${{env.DOTNET_ROOT}}/myapp
-  
-    - uses: azure/sql-action@v2
-      with:
-        connection-string: ${{ secrets.AZURE_SQL_DB_BILLIE }}
-        path: './Billie-Jean-TV.dacpac'
-        action: 'Publish'
         
   expatery-api-deploy:
     runs-on: windows-latest
