@@ -3,7 +3,7 @@ name: Build and deploy ASP.Net Core app to Azure Web App - expatery-api
 on:
   push:
     branches:
-      - main
+      - github-actions-workflows
   workflow_dispatch:
 
 jobs:
@@ -38,7 +38,13 @@ jobs:
         with:
           name: dotnet-app
           path: ${{env.DOTNET_ROOT}}/myapp
-
+  
+    - uses: azure/sql-action@v2
+      with:
+        connection-string: ${{ secrets.AZURE_SQL_DB_BILLIE }}
+        path: './Billie-Jean-TV.dacpac'
+        action: 'Publish'
+        
   expatery-api-deploy:
     runs-on: windows-latest
     needs: expatery-api-build
@@ -47,7 +53,7 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v1
       
       - name: Login to Azure to deploy
         uses: azure/login@v1
@@ -58,15 +64,12 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: dotnet-app
-
-      - name: Deploy to Azure SQL
-        uses: azure/sql-action@v2
-        
+      - uses: azure/sql-action@v2
         with:
           connection-string: ${{ secrets.AZURE_SQL_DB_BILLIE }}
-          path: 'Billie-Jean-TV.dacpac'
+          path: './Billie-Jean-TV.dacpac'
           action: 'Publish'
-
+          
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
@@ -75,3 +78,7 @@ jobs:
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_API }}
           package: ${{ github.workspace }}/dotnet-app
+
+      - name: logout
+        run: |
+            az logout
