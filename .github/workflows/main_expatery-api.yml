@@ -8,7 +8,7 @@ on:
 
 jobs:
   expatery-api-build:
-    runs-on: self-hosted
+    runs-on: windows-latest
 
     steps:
       - name: Set up Git config
@@ -45,7 +45,7 @@ jobs:
           path: ${{env.DOTNET_ROOT}}/myapp
 
   expatery-api-deploy:
-    runs-on: self-hosted
+    runs-on: windows-latest
     needs: expatery-api-build
     environment:
       name: 'Production'
