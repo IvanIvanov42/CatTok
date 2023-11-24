@@ -1,8 +1,12 @@
-﻿namespace Expatery_API.Services
+﻿using Expatery_API.Models;
+
+namespace Expatery_API.Services
 {
     public interface IInstagramDataStorage
     {
-        string GetLatestTimestamp();
-        void UpdateLatestTimestamp(string newTimestamp);
+        Task<string> GetLatestTimestamp();
+        Task UpdateLatestTimestamp(string newTimestamp);
+        Task<List<Media>> GetMediaListAsync();
+        Task AddMediaAsync(List<Media> mediaList);
     }
 }

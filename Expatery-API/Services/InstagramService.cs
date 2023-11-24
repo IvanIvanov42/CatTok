@@ -1,18 +1,21 @@
 ﻿using Expatery_API.Models;
+using Expatery_API.Services;
 using System.Text.Json;
 
 public class InstagramService
 {
     private readonly HttpClient _httpClient;
+    private readonly IInstagramDataStorage _instagramDataStorage;
 
-    public InstagramService(HttpClient httpClient)
+    public InstagramService(HttpClient httpClient, IInstagramDataStorage instagramDataStorage)
     {
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+        _instagramDataStorage = instagramDataStorage ?? throw new ArgumentNullException(nameof(instagramDataStorage));
     }
 
     public async Task<string?> GetInstagramDataAsync(string accessToken, string latestTimestamp)
     {
-        string apiUrl = $"https://graph.instagram.com/me/media?fields=id,timestamp&since={latestTimestamp}&access_token={accessToken}";
+        string apiUrl = $"https://graph.instagram.com/me/media?fields=id,timestamp&since={latestTimestamp[..^4]}&access_token={accessToken}";
 
         HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
 
@@ -46,6 +49,23 @@ public class InstagramService
             }
         }
         return mediaList;
+    }
+
+    public async Task<List<Media>?> GetMediaFromDb()
+    {
+        try
+        {
+            // Call the method in your storage service to get media data from the database
+            List<Media> mediaList = await _instagramDataStorage.GetMediaListAsync();
+
+            return mediaList;
+        }
+        catch (Exception ex)
+        {
+            // Log the exception
+            Console.WriteLine(ex);
+            throw; // Re-throw the exception to be handled by the controller
+        }
     }
 
     public async Task UpdateLatestTimeStampAsync(InstagramDataStorageDbContext dbContext, string newTimestamp)
