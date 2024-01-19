@@ -3,6 +3,7 @@ using Expatery_API.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Expatery_API.Migrations
 {
     [DbContext(typeof(InstagramDataStorageDbContext))]
-    partial class InstagramDataStorageDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240119173513_AddTimeStamps")]
+    partial class AddTimeStamps
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
