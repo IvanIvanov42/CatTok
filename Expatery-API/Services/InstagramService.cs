@@ -35,7 +35,7 @@ public class InstagramService
         List<Media> mediaList = new List<Media>();
         foreach (string id in listOfIds)
         {
-            string mediaApiUrl = $"https://graph.instagram.com/{id}?fields=id,media_type,media_url,username,timestamp&access_token={accessToken}";
+            string mediaApiUrl = $"https://graph.instagram.com/{id}?fields=id,media_type,media_url,caption,timestamp&access_token={accessToken}";
             HttpResponseMessage mediaResponse = await _httpClient.GetAsync(mediaApiUrl);
             if (mediaResponse.IsSuccessStatusCode)
             {

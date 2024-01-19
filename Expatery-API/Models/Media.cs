@@ -8,7 +8,7 @@ namespace Expatery_API.Models
         public string media_type { get; set; }
         public string media_url { get; set; }
         public string? caption { get; set; }
-        public string username { get; set; }
+
         [Column("time_stamp")]
         public string timestamp { get; set; }
     }
