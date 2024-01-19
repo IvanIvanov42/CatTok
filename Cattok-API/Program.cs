@@ -17,11 +17,11 @@ builder.Services.AddSwaggerGen();
 // Read the Instagram access token from the configuration file
 var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: false)
-    .AddJsonFile("appsettings.secret.json", optional: true) // Add this line
+    .AddJsonFile("appsettings.secret.json", optional: true)
     .Build();
 
 string instagramAccessToken = configuration["InstagramAccessToken"];
-string azureSqlConnection = configuration.GetConnectionString("Billie-Jean-TV-SQL");
+string azureSqlConnection = configuration.GetConnectionString("SQL-CATTOK");
 
 builder.Services.AddDbContext<InstagramDataStorageDbContext>(options =>
     options.UseSqlServer(azureSqlConnection));
