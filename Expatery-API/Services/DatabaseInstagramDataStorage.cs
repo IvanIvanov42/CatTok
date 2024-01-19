@@ -26,5 +26,28 @@ namespace Expatery_API.Services
 
             await dbContext.SaveChangesAsync();
         }
+
+        public async Task<string> GetLatestTimestamp()
+        {
+            var latestTimestampEntity = await dbContext.InstagramTimeStamps.FirstOrDefaultAsync();
+            return latestTimestampEntity?.LatestTimeStamp
+                   ?? DateTime.MinValue.ToString();
+        }
+
+        public async Task UpdateLatestTimestamp(string newTimestamp)
+        {
+            var latestTimestampEntity = await dbContext.InstagramTimeStamps.FirstOrDefaultAsync();
+            if (latestTimestampEntity == null)
+            {
+                latestTimestampEntity = new InstagramTimeStamp { LatestTimeStamp = newTimestamp };
+                await dbContext.InstagramTimeStamps.AddAsync(latestTimestampEntity);
+            }
+            else
+            {
+                latestTimestampEntity.LatestTimeStamp = newTimestamp;
+            }
+
+            await dbContext.SaveChangesAsync();
+        }
     }
 }

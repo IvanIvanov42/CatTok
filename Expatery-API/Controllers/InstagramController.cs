@@ -45,9 +45,8 @@ namespace Expatery_API.Controllers
                 return StatusCode(500, "Internal Server Error");
             }
         }
-
         [HttpPost]
-        public async Task<IActionResult> PostInstagramData()
+        public async Task<IActionResult> PostInstagramData(Media media)
         {
             string? accessToken = HttpContext.Items["InstagramAccessToken"] as string;
 
@@ -58,8 +57,11 @@ namespace Expatery_API.Controllers
             }
             try
             {
-                // Use the access token in InstagramService
-                var instagramData = await _instagramService.GetInstagramDataAsync(accessToken);
+                // Retrieve the latest stored timestamp or ID
+                string latestTimestamp = await _instagramDataStorage.GetLatestTimestamp();
+
+                // Use the access token and latest timestamp in your InstagramService
+                var instagramData = await _instagramService.GetInstagramDataAsync(accessToken, latestTimestamp);
 
                 InstagramResponseModel? responseModel = JsonSerializer.Deserialize<InstagramResponseModel>(instagramData);
 
@@ -69,11 +71,14 @@ namespace Expatery_API.Controllers
 
                     // Call the new method to get media details
                     List<Media>? mediaList = await _instagramService.GetMediaDetailsAsync(listOfIds, accessToken);
-
+                    
                     try
                     {
                         // Call the method in your service to add the media to the database
                         await _instagramDataStorage.AddMediaAsync(mediaList);
+
+                        // Update the latest timestamp in the storage
+                        await _instagramDataStorage.UpdateLatestTimestamp(mediaList.Max(m => m.timestamp));
 
                         // Return a success response
                         return Ok("Data posted successfully");

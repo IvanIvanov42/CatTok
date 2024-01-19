@@ -13,9 +13,9 @@ public class InstagramService
         _instagramDataStorage = instagramDataStorage ?? throw new ArgumentNullException(nameof(instagramDataStorage));
     }
 
-    public async Task<string?> GetInstagramDataAsync(string accessToken)
+    public async Task<string?> GetInstagramDataAsync(string accessToken, string latestTimestamp)
     {
-        string apiUrl = $"https://graph.instagram.com/me/media?fields=id&access_token={accessToken}";
+        string apiUrl = $"https://graph.instagram.com/me/media?fields=id,timestamp&since={latestTimestamp[..^4]}&access_token={accessToken}";
 
         HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
 
@@ -56,7 +56,9 @@ public class InstagramService
         try
         {
             // Call the method in your storage service to get media data from the database
-            return await _instagramDataStorage.GetMediaListAsync();
+            List<Media> mediaList = await _instagramDataStorage.GetMediaListAsync();
+
+            return mediaList;
         }
         catch (Exception ex)
         {
@@ -64,5 +66,12 @@ public class InstagramService
             Console.WriteLine(ex);
             throw; // Re-throw the exception to be handled by the controller
         }
+    }
+
+    public async Task UpdateLatestTimeStampAsync(InstagramDataStorageDbContext dbContext, string newTimestamp)
+    {
+        var timeStamp = new InstagramTimeStamp { LatestTimeStamp = newTimestamp };
+        dbContext.InstagramTimeStamps.Add(timeStamp);
+        await dbContext.SaveChangesAsync();
     }
 }
