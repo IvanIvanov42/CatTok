@@ -23,10 +23,8 @@ var configuration = new ConfigurationBuilder()
 string instagramAccessToken = configuration["InstagramAccessToken"];
 string azureSqlConnection = configuration.GetConnectionString("Billie-Jean-TV-SQL");
 
-
 builder.Services.AddDbContext<InstagramDataStorageDbContext>(options =>
     options.UseSqlServer(azureSqlConnection));
-
 
 builder.Services.AddScoped<IInstagramDataStorage, DatabaseInstagramDataStorage>();
 

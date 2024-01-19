@@ -1,4 +1,5 @@
 ﻿using Expatery_API.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Expatery_API.Services
 {
@@ -11,26 +12,42 @@ namespace Expatery_API.Services
             this.dbContext = dbContext;
         }
 
-        public string GetLatestTimestamp()
+        public async Task<List<Media>> GetMediaListAsync()
         {
-            var latestTimestampEntity = dbContext.InstagramTimeStamps.FirstOrDefault();
-            return latestTimestampEntity?.LatestTimeStamp ?? DateTime.MinValue.ToString();
+            return await dbContext.Medias.ToListAsync();
         }
 
-        public void UpdateLatestTimestamp(string newTimestamp)
+        public async Task AddMediaAsync(List<Media> mediaList)
         {
-            var latestTimestampEntity = dbContext.InstagramTimeStamps.FirstOrDefault();
+            foreach (var media in mediaList)
+            {
+                await dbContext.Medias.AddAsync(media);
+            }
+
+            await dbContext.SaveChangesAsync();
+        }
+
+        public async Task<string> GetLatestTimestamp()
+        {
+            var latestTimestampEntity = await dbContext.InstagramTimeStamps.FirstOrDefaultAsync();
+            return latestTimestampEntity?.LatestTimeStamp
+                   ?? DateTime.MinValue.ToString();
+        }
+
+        public async Task UpdateLatestTimestamp(string newTimestamp)
+        {
+            var latestTimestampEntity = await dbContext.InstagramTimeStamps.FirstOrDefaultAsync();
             if (latestTimestampEntity == null)
             {
                 latestTimestampEntity = new InstagramTimeStamp { LatestTimeStamp = newTimestamp };
-                dbContext.InstagramTimeStamps.Add(latestTimestampEntity);
+                await dbContext.InstagramTimeStamps.AddAsync(latestTimestampEntity);
             }
             else
             {
                 latestTimestampEntity.LatestTimeStamp = newTimestamp;
             }
 
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
         }
     }
 }
