@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cattok-API", "Cattok-API.csproj", "{C5365CC7-21F3-4155-9F86-36A3263926D9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CatTok-API", "CatTok-API.csproj", "{C5365CC7-21F3-4155-9F86-36A3263926D9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
