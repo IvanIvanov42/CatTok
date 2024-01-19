@@ -5,7 +5,6 @@ namespace Expatery_API.Models
 {
     public class InstagramDataStorageDbContext : DbContext
     {
-        public DbSet<InstagramTimeStamp> InstagramTimeStamps { get; set; }
         public DbSet<Media> Medias { get; set; }
 
         public InstagramDataStorageDbContext(DbContextOptions<InstagramDataStorageDbContext> options)
@@ -17,7 +16,6 @@ namespace Expatery_API.Models
         {
             // Optionally configure additional settings here
             // For example, specifying table name:
-            modelBuilder.Entity<InstagramTimeStamp>().ToTable("InstagramTimeStamp");
             modelBuilder.Entity<Media>().ToTable("Media");
 
             base.OnModelCreating(modelBuilder);

@@ -1,5 +1,7 @@
+using Expatery_API.Controllers;
 using Expatery_API.Models;
 using Expatery_API.Services;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
