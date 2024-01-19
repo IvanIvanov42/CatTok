@@ -1,7 +1,6 @@
 using Expatery_API.Controllers;
 using Expatery_API.Models;
 using Expatery_API.Services;
-using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,10 +24,8 @@ var configuration = new ConfigurationBuilder()
 string instagramAccessToken = configuration["InstagramAccessToken"];
 string azureSqlConnection = configuration.GetConnectionString("Billie-Jean-TV-SQL");
 
-
 builder.Services.AddDbContext<InstagramDataStorageDbContext>(options =>
     options.UseSqlServer(azureSqlConnection));
-
 
 builder.Services.AddScoped<IInstagramDataStorage, DatabaseInstagramDataStorage>();
 
