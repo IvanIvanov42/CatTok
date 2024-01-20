@@ -1,7 +1,7 @@
-﻿using Expatery_API.Models;
+﻿using Cattok_API.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Expatery_API.Services
+namespace Cattok_API.Services
 {
     public class DatabaseInstagramDataStorage : IInstagramDataStorage
     {

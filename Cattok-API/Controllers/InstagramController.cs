@@ -1,5 +1,5 @@
-﻿using Expatery_API.Models;
-using Expatery_API.Services;
+﻿using Cattok_API.Models;
+using Cattok_API.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Expatery_API.Controllers
+namespace Cattok_API.Controllers
 {
     [ApiController]
     [Route("[controller]")]

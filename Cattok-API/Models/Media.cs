@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Expatery_API.Models
+namespace Cattok_API.Models
 {
     public class Media
     {

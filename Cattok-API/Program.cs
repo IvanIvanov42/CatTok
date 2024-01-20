@@ -1,5 +1,5 @@
-using Expatery_API.Models;
-using Expatery_API.Services;
+using Cattok_API.Models;
+using Cattok_API.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

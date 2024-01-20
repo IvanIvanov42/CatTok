@@ -7,6 +7,10 @@
     <RootNamespace>Cattok_API</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Content Remove="appsettings.secret.json" />
+  </ItemGroup>
+
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.1" />
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.4" />
@@ -21,6 +25,10 @@
 			<Link>Billie-Jean-TV.dacpac</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="appsettings.secret.json" />
 	</ItemGroup>
 
 </Project>
