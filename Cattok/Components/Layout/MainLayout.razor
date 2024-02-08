@@ -5,11 +5,16 @@
     <div>
         <h3>@@igname</h3>
     </div>
-    <div>
-        <img src="img/info.svg" style="width:36px; height:auto;" />
+    <div @onclick="@(() => Modal.Show<Information>("Test"))">
+        <img src="img/info.svg" style="width:36px; height:auto;"/>
     </div>
 </div>
 
 <main class="px-5 py-4">
     @Body
 </main>
+
+
+@code{
+    [CascadingParameter] public IModalService Modal { get; set; } = default!;
+}
