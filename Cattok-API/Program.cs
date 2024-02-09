@@ -21,6 +21,8 @@ var configuration = new ConfigurationBuilder()
     .Build();
 
 string instagramAccessToken = configuration["InstagramAccessToken"];
+string clientId = configuration["ClientId"];
+string redirectUri = configuration["RedirectUri"];
 string azureSqlConnection = configuration.GetConnectionString("SQL-CATTOK");
 
 builder.Services.AddDbContext<InstagramDataStorageDbContext>(options =>
@@ -45,6 +47,8 @@ app.UseAuthorization();
 app.Use((context, next) =>
 {
     context.Items["InstagramAccessToken"] = instagramAccessToken;
+    context.Items["ClientId"] = clientId;
+    context.Items["RedirectUri"] = redirectUri;
     return next();
 });
 

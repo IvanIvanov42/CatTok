@@ -45,6 +45,7 @@ namespace Cattok_API.Controllers
                 return StatusCode(500, "Internal Server Error");
             }
         }
+
         [HttpPost]
         public async Task<IActionResult> PostInstagramData(Media media)
         {
@@ -71,7 +72,7 @@ namespace Cattok_API.Controllers
 
                     // Call the new method to get media details
                     List<Media>? mediaList = await _instagramService.GetMediaDetailsAsync(listOfIds, accessToken);
-                    
+
                     try
                     {
                         // Call the method in your service to add the media to the database
@@ -91,6 +92,37 @@ namespace Cattok_API.Controllers
                     }
                 }
                 return StatusCode(204, "No new data.");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine(ex);
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
+        [HttpPost("AuthorizeUser")]
+        public async Task<IActionResult> AuthorizeUser()
+        {
+            string? clientId = HttpContext.Items["ClientId"] as string;
+            string? redirectId = HttpContext.Items["RedirectUri"] as string;
+            if (string.IsNullOrEmpty(clientId))
+            {
+                // Handle the case where the access token is not available
+                return StatusCode(500, "App ID not found.");
+            }
+            if (string.IsNullOrEmpty(redirectId))
+            {
+                // Handle the case where the access token is not available
+                return StatusCode(500, "Redirect ID not found.");
+            }
+            try
+            {
+                // Use the access token and latest timestamp in your InstagramService
+                var instagramData = await _instagramService.GetAuthorizationAsync(clientId, redirectId);
+
+                // Return a success response
+                return Ok("instagramData");
             }
             catch (Exception ex)
             {

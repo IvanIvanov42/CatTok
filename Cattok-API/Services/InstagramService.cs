@@ -30,13 +30,24 @@ public class InstagramService
         }
     }
 
+    public async Task<string?> GetAuthorizationAsync(string clientId, string redirectId)
+    {
+        string apiUrl = $"https://api.instagram.com/oauth/authorize?client_id={clientId}&redirect_uri={redirectId}&scope=user_profile,user_media&response_type=code";
+
+        HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
+
+        return await response.Content.ReadAsStringAsync();
+    }
+
+    //public async Task<string?> Get
+
     public async Task<List<Media>?> GetMediaDetailsAsync(List<string> listOfIds, string accessToken)
     {
         List<Media> mediaList = new List<Media>();
         foreach (string id in listOfIds)
         {
-            string mediaApiUrl = $"https://graph.instagram.com/{id}?fields=id,media_type,media_url,caption,timestamp&access_token={accessToken}";
-            HttpResponseMessage mediaResponse = await _httpClient.GetAsync(mediaApiUrl);
+            string apiUrl = $"https://graph.instagram.com/{id}?fields=id,media_type,media_url,caption,timestamp&access_token={accessToken}";
+            HttpResponseMessage mediaResponse = await _httpClient.GetAsync(apiUrl);
             if (mediaResponse.IsSuccessStatusCode)
             {
                 string mediaData = await mediaResponse.Content.ReadAsStringAsync();
