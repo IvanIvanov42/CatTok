@@ -1,0 +1,28 @@
+﻿@page "/auth"
+@inject NavigationManager NavigationManager
+@inject IInstagramService instagramService
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? Code { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        if (Code != null)
+        {
+            var response = await instagramService.SendAuthorizationToken(Code);
+            if (response.IsSuccessStatusCode)
+            {
+                // Handle success
+                var result = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Message: {result}");
+            }
+            else
+            {
+                // Handle failure
+                var result = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Error: {result}");
+            }
+        }
+
+    }
+}

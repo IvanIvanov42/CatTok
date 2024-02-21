@@ -1,5 +1,7 @@
 using CatTok.Components;
 using Blazored.Modal;
+using CatTok.Services.IServices;
+using CatTok.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +12,13 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddBlazoredModal();
 
+var configuration = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.secret.json", optional: true)
+    .Build();
+
+builder.Services.AddHttpClient("CatTokAPI", client => client.BaseAddress = new Uri(configuration["CatTokAPIUri"]));
+
+builder.Services.AddScoped<IInstagramService, InstagramService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

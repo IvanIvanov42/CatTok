@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>Cattok_API</RootNamespace>
+	<TargetFramework>net8.0</TargetFramework>
+	<Nullable>enable</Nullable>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<RootNamespace>Cattok_API</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="appsettings.secret.json" />
+	<Content Remove="appsettings.secret.json" />
   </ItemGroup>
 
 	<ItemGroup>
