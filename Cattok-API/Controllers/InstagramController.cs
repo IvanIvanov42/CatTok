@@ -102,34 +102,9 @@ namespace Cattok_API.Controllers
         }
 
         [HttpPost("AuthorizeUser")]
-        public async Task<IActionResult> AuthorizeUser()
+        public async Task<IActionResult> AuthorizeUser([FromBody] string value)
         {
-            string? clientId = HttpContext.Items["ClientId"] as string;
-            string? redirectId = HttpContext.Items["RedirectUri"] as string;
-            if (string.IsNullOrEmpty(clientId))
-            {
-                // Handle the case where the access token is not available
-                return StatusCode(500, "App ID not found.");
-            }
-            if (string.IsNullOrEmpty(redirectId))
-            {
-                // Handle the case where the access token is not available
-                return StatusCode(500, "Redirect ID not found.");
-            }
-            try
-            {
-                // Use the access token and latest timestamp in your InstagramService
-                var instagramData = await _instagramService.GetAuthorizationAsync(clientId, redirectId);
-
-                // Return a success response
-                return Ok("instagramData");
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                Console.WriteLine(ex);
-                return StatusCode(500, "Internal Server Error");
-            }
+            return Ok(new { message = "Operation successful: " + value });
         }
     }
 }

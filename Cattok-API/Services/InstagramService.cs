@@ -39,8 +39,6 @@ public class InstagramService
         return await response.Content.ReadAsStringAsync();
     }
 
-    //public async Task<string?> Get
-
     public async Task<List<Media>?> GetMediaDetailsAsync(List<string> listOfIds, string accessToken)
     {
         List<Media> mediaList = new List<Media>();

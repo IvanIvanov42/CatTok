@@ -2,6 +2,8 @@ using Cattok_API.Models;
 using Cattok_API.Services;
 using Microsoft.EntityFrameworkCore;
 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -21,14 +23,21 @@ var configuration = new ConfigurationBuilder()
     .Build();
 
 string instagramAccessToken = configuration["InstagramAccessToken"];
-string clientId = configuration["ClientId"];
-string redirectUri = configuration["RedirectUri"];
 string azureSqlConnection = configuration.GetConnectionString("SQL-CATTOK");
 
 builder.Services.AddDbContext<InstagramDataStorageDbContext>(options =>
     options.UseSqlServer(azureSqlConnection));
 
 builder.Services.AddScoped<IInstagramDataStorage, DatabaseInstagramDataStorage>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy =>
+                      {
+                          policy.WithOrigins("https://localhost:7057");
+                      });
+});
 
 var app = builder.Build();
 
@@ -43,12 +52,12 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
+app.UseCors(MyAllowSpecificOrigins);
+
 // Pass the Instagram access token to the InstagramService
 app.Use((context, next) =>
 {
     context.Items["InstagramAccessToken"] = instagramAccessToken;
-    context.Items["ClientId"] = clientId;
-    context.Items["RedirectUri"] = redirectUri;
     return next();
 });
 
