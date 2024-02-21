@@ -1,0 +1,9 @@
+﻿.container-fluid {
+    border-top: 1px solid;
+    border-image: linear-gradient(to right, white 25%, black 25%, black 75%, white 75%) 100% 1;
+    padding-top: 50px;
+}
+
+.col{
+    margin: 0 25px;
+}

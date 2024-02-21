@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace Expatery_API.Migrations
+namespace Cattok_API.Migrations
 {
     /// <inheritdoc />
     public partial class UpdateMediaModel : Migration

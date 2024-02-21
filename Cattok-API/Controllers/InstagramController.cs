@@ -1,5 +1,5 @@
-﻿using Expatery_API.Models;
-using Expatery_API.Services;
+﻿using Cattok_API.Models;
+using Cattok_API.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Expatery_API.Controllers
+namespace Cattok_API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
@@ -45,6 +45,7 @@ namespace Expatery_API.Controllers
                 return StatusCode(500, "Internal Server Error");
             }
         }
+
         [HttpPost]
         public async Task<IActionResult> PostInstagramData(Media media)
         {
@@ -71,7 +72,7 @@ namespace Expatery_API.Controllers
 
                     // Call the new method to get media details
                     List<Media>? mediaList = await _instagramService.GetMediaDetailsAsync(listOfIds, accessToken);
-                    
+
                     try
                     {
                         // Call the method in your service to add the media to the database
@@ -98,6 +99,12 @@ namespace Expatery_API.Controllers
                 Console.WriteLine(ex);
                 return StatusCode(500, "Internal Server Error");
             }
+        }
+
+        [HttpPost("AuthorizeUser")]
+        public async Task<IActionResult> AuthorizeUser([FromBody] string value)
+        {
+            return Ok(new { message = "Operation successful: " + value });
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Expatery_API.Models
+﻿namespace Cattok_API.Models
 {
     public class InstagramResponseModel
     {

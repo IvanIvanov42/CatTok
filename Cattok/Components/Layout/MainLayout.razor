@@ -1,9 +1,26 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="d-flex justify-content-center border-bottom">
-    <h1>Billie-TV</h1>
+<div class="d-flex justify-content-between align-items-center pt-2 px-5 mb-0">
+    <div style="width:36px;">&nbsp;</div>
+    <div>
+        <h3>@@igname</h3>
+    </div>
+    <div @onclick="@(() => Modal.Show<Information>(options))">
+        <img src="img/info.svg" style="width:36px; height:auto;"/>
+    </div>
 </div>
 
-<main class="px-5 py-4">
+<main class="px-5 py-2">
     @Body
 </main>
+
+
+@code{
+    [CascadingParameter] public IModalService Modal { get; set; } = default!;
+    ModalOptions options = new ModalOptions()
+    {
+        Size = ModalSize.Large,
+        HideCloseButton = true,
+        HideHeader = true
+    };
+}

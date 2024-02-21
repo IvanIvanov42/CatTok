@@ -1,6 +1,8 @@
-using Expatery_API.Models;
-using Expatery_API.Services;
+using Cattok_API.Models;
+using Cattok_API.Services;
 using Microsoft.EntityFrameworkCore;
+
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,15 @@ builder.Services.AddDbContext<InstagramDataStorageDbContext>(options =>
 
 builder.Services.AddScoped<IInstagramDataStorage, DatabaseInstagramDataStorage>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy =>
+                      {
+                          policy.WithOrigins("https://localhost:7057");
+                      });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -40,6 +51,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseCors(MyAllowSpecificOrigins);
 
 // Pass the Instagram access token to the InstagramService
 app.Use((context, next) =>

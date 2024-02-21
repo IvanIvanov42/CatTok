@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Cattok_API.Migrations
 {
     [DbContext(typeof(InstagramDataStorageDbContext))]
-    [Migration("20240119165537_UpdateMediaModel")]
-    partial class UpdateMediaModel
+    [Migration("20240120125209_CatTok")]
+    partial class CatTok
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,6 +23,23 @@ namespace Cattok_API.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Cattok_API.Models.InstagramTimeStamp", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("LatestTimeStamp")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("InstagramTimeStamp", (string)null);
+                });
 
             modelBuilder.Entity("Cattok_API.Models.Media", b =>
                 {

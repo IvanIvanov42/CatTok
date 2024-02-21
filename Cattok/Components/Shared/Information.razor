@@ -1,0 +1,32 @@
+﻿@inject NavigationManager NavigationManager
+@inject IConfiguration Configuration
+
+<div class="container">
+    <div class="row">
+        <h1 class="text-center">CatTok</h1>
+    </div>
+    <div class="row" style="font-size:20px;margin-bottom: 60px;">
+        <p>CatTok is the best website in the world!<br/>
+        Embark on an adventure to uncover a myriad of enchanting felines!</p>
+
+        <div>
+            How to show-off your cat?
+            <ul style="list-style-image: url('img/cat.svg');">
+                <li>Connect your cat’s IG account!</li>
+                <li>Use a spare phone to showcase your cat!</li>
+            </ul>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <button class="btn btn-outline-dark btn-lg" type="button" @onclick="CallInstagram">Connect</button>
+    </div>
+</div>
+
+@code {
+    void CallInstagram()
+    {
+        var clientId = Configuration["ClientId"];
+        var redirectId = Configuration["RedirectUri"];
+        NavigationManager.NavigateTo($"https://api.instagram.com/oauth/authorize?client_id={clientId}&redirect_uri={redirectId}&scope=user_profile,user_media&response_type=code");
+    }
+}
