@@ -1,0 +1,9 @@
+title Login
+
+actor Cat Owner
+Cat Owner->CatTok:Logs in
+
+CatTok->API: LoginRequest
+API->Database: LoginRequest
+Database-->>API: LoginResponse
+API-->>CatTok: LoginResponse

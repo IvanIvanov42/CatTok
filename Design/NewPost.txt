@@ -1,0 +1,8 @@
+title Cat Owner Posts New Content
+
+actor Cat Owner
+Cat Owner->>Instagram:Uploads new Post
+
+Instagram->API:Webhook
+API->>Database: New Media Content
+Database->Database: Add New Media

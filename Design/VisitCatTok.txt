@@ -1,0 +1,14 @@
+title Visit CatTok
+
+actor User
+User->CatTok: Visits website
+
+CatTok->API: RequestUserList
+API->Database: FetchUserList
+Database-->>API: UserList
+API-->>CatTok: UserList
+CatTok->CatTok: SelectRandomUser
+CatTok->CatTok: PreloadOtherUsers
+
+CatTok->User: DisplayRandomUser
+User->CatTok: SwipeThroughUsers

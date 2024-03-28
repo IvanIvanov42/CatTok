@@ -1,0 +1,12 @@
+title Instagram Authorization
+
+actor Cat Owner
+Cat Owner->CatTok: Wants to authorize IG profile
+
+CatTok->Instagram: AuthorizationRequest
+Instagram-->>CatTok: AuthorizationResponse
+
+CatTok->API: AuthorizationData
+API->Database: AuthorizationData
+Database-->>API: Response
+API-->>CatTok: Response
