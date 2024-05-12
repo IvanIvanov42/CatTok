@@ -20,7 +20,25 @@ namespace Cattok_API.Data.Repository
 
         public async Task AddMediaAsync(List<Media> mediaList)
         {
-            await _dbContext.Medias.AddRangeAsync(mediaList);
+            var mediaIds = mediaList.Select(m => m.Id);
+            var existingMedias = await _dbContext.Medias
+                                                 .Where(m => mediaIds.Contains(m.Id))
+                                                 .ToListAsync();
+
+            foreach (var newMedia in mediaList)
+            {
+                var existingMedia = existingMedias.FirstOrDefault(m => m.Id == newMedia.Id);
+
+                if (existingMedia != null)
+                {
+                    _dbContext.Entry(existingMedia).CurrentValues.SetValues(newMedia);
+                }
+                else
+                {
+                    await _dbContext.Medias.AddAsync(newMedia);
+                }
+            }
+
             await _dbContext.SaveChangesAsync();
         }
     }
