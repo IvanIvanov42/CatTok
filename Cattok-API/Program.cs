@@ -11,6 +11,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -20,24 +22,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
+var keyVaultUrl = builder.Configuration["KeyVault:VaultUri"];
+var credential = new DefaultAzureCredential();
+
+builder.Services.AddSingleton(x => new SecretClient(new Uri(keyVaultUrl), credential));
+
+builder.Services.AddDbContext<MediaContext>();
+
 builder.Services.AddHttpClient<IInstagramService, InstagramService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-// Read the Instagram access token from the configuration file
-var configuration = new ConfigurationBuilder()  
-    .AddJsonFile("appsettings.json", optional: false)
-    .AddJsonFile("appsettings.secret.json", optional: true)
-    .Build();
-
-string instagramAccessToken = configuration["InstagramAccessToken"];
-string clientId = configuration["ClientId"];
-string azureSqlConnection = configuration.GetConnectionString("SQL-CATTOK");
-
-builder.Services.AddDbContext<MediaContext>(options =>
-    options.UseSqlServer(azureSqlConnection));
 
 builder.Services.AddIdentity<InstagramUser, IdentityRole>()
            .AddEntityFrameworkStores<MediaContext>()
@@ -71,7 +67,11 @@ builder.Services.AddSwaggerGen(options =>
 
 using var loggerFactory = LoggerFactory.Create(b => b.SetMinimumLevel(LogLevel.Trace).AddConsole());
 
-var secret = builder.Configuration["JWT:Secret"] ?? throw new InvalidOperationException("Secret not configured");
+var secretClient = new SecretClient(new Uri(keyVaultUrl), credential);
+
+var secret = secretClient.GetSecret("JWT-Secret").Value.Value;
+var validIssuer = secretClient.GetSecret("JWT-ValidIssuer").Value.Value;
+var validAudience = secretClient.GetSecret("JWT-ValidAudience").Value.Value;
 
 builder.Services.AddAuthentication(options =>
 {
@@ -84,8 +84,8 @@ builder.Services.AddAuthentication(options =>
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
-        ValidAudience = builder.Configuration["JWT:ValidAudience"],
+        ValidIssuer = validIssuer,
+        ValidAudience = validAudience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
         ClockSkew = new TimeSpan(0, 0, 5)
     };
@@ -127,14 +127,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseCors(MyAllowSpecificOrigins);
-
-// Pass the Instagram access token to the InstagramService
-app.Use((context, next) =>
-{
-    context.Items["InstagramAccessToken"] = instagramAccessToken;
-    context.Items["ClientId"] = clientId;
-    return next();
-});
 
 app.MapControllers();
 

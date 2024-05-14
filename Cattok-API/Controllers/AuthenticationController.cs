@@ -1,4 +1,5 @@
-﻿using Cattok_API.Authentication;
+﻿using Azure.Security.KeyVault.Secrets;
+using Cattok_API.Authentication;
 using Cattok_API.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -16,13 +17,13 @@ namespace WebApiAuthentication.Controllers
     public class AuthenticationController : ControllerBase
     {
         private readonly UserManager<InstagramUser> _userManager;
-        private readonly IConfiguration _configuration;
+        private readonly SecretClient _secretClient;
         private readonly ILogger<AuthenticationController> _logger;
 
-        public AuthenticationController(UserManager<InstagramUser> userManager, IConfiguration configuration, ILogger<AuthenticationController> logger)
+        public AuthenticationController(UserManager<InstagramUser> userManager, SecretClient secretClient, ILogger<AuthenticationController> logger)
         {
             _userManager = userManager;
-            _configuration = configuration;
+            _secretClient = secretClient;
             _logger = logger;
         }
 
@@ -152,12 +153,12 @@ namespace WebApiAuthentication.Controllers
 
         private ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
         {
-            var secret = _configuration["JWT:Secret"] ?? throw new InvalidOperationException("Secret not configured");
+            var secret = GetSecret("JWT-Secret");
 
             var validation = new TokenValidationParameters
             {
-                ValidIssuer = _configuration["JWT:ValidIssuer"],
-                ValidAudience = _configuration["JWT:ValidAudience"],
+                ValidIssuer = GetSecret("JWT-ValidIssuer"),
+                ValidAudience = GetSecret("JWT-ValidAudience"),
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
                 ValidateLifetime = false
             };
@@ -174,11 +175,11 @@ namespace WebApiAuthentication.Controllers
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                _configuration["JWT:Secret"] ?? throw new InvalidOperationException("Secret not configured")));
+                GetSecret("JWT-Secret")));
 
             var token = new JwtSecurityToken(
-                issuer: _configuration["JWT:ValidIssuer"],
-                audience: _configuration["JWT:ValidAudience"],
+                issuer: GetSecret("JWT-ValidIssuer"),
+                audience: GetSecret("JWT-ValidAudience"),
                 expires: DateTime.UtcNow.AddHours(1),
                 claims: authClaims,
                 signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
@@ -196,6 +197,12 @@ namespace WebApiAuthentication.Controllers
             generator.GetBytes(randomNumber);
 
             return Convert.ToBase64String(randomNumber);
+        }
+
+        private string GetSecret(string secretName)
+        {
+            KeyVaultSecret secret = _secretClient.GetSecret(secretName);
+            return secret.Value;
         }
     }
 }

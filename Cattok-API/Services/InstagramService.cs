@@ -4,16 +4,17 @@ using Cattok_API.Services;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http;
+using Azure.Security.KeyVault.Secrets;
 
 public class InstagramService : IInstagramService
 {
     private readonly HttpClient _httpClient;
-    private readonly IConfiguration _configuration;
+    private readonly SecretClient _secretClient;
 
-    public InstagramService(HttpClient httpClient, IConfiguration configuration)
+    public InstagramService(HttpClient httpClient, SecretClient secretClient)
     {
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        _secretClient = secretClient ?? throw new ArgumentNullException(nameof(secretClient));
     }
 
     public async Task<List<Media>?> GetInstagramDataAsync(string accessToken)
@@ -40,9 +41,9 @@ public class InstagramService : IInstagramService
 
     public async Task<string?> GetShortLivedAccessTokenAsync(string code)
     {
-        var clientId = _configuration["ClientId"];
-        var clientSecret = _configuration["ClientSecret"];
-        var redirectUri = _configuration["RedirectUri"];
+        var clientId = await GetSecretAsync("ClientId");
+        var clientSecret = await GetSecretAsync("ClientSecret");
+        var redirectUri = await GetSecretAsync("RedirectUri");
 
         var requestBody = new Dictionary<string, string>
         {
@@ -68,7 +69,7 @@ public class InstagramService : IInstagramService
 
     public async Task<string?> GetLongLivedAccessTokenAsync(string shortLivedAccessToken)
     {
-        var clientSecret = _configuration["ClientSecret"];
+        var clientSecret = await GetSecretAsync("ClientSecret");
         string requestUrl = $"https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret={clientSecret}&access_token={shortLivedAccessToken}";
 
         var response = await _httpClient.GetAsync(requestUrl);
@@ -99,5 +100,11 @@ public class InstagramService : IInstagramService
         }
 
         return null;
+    }
+
+    private async Task<string> GetSecretAsync(string secretName)
+    {
+        KeyVaultSecret secret = await _secretClient.GetSecretAsync(secretName);
+        return secret.Value;
     }
 }
