@@ -1,13 +1,37 @@
 ﻿@page "/"
+@inject IInstagramService InstagramService
+
 
 <div class="container-fluid text-center">
     <div class="row">
-        <div class="col" style="background-color:red">hey</div>
-        <div class="col-6" style="background-color:green">hey</div>
-        <div class="col" style="background-color:blue">hey</div>
+        <div class="col-md"><MediaDisplay Medias="@Medias.Take(Length/2)"/></div>
+        <div class="col-md-6">hey</div>
+        <div class="col-md"><MediaDisplay Medias="@Medias.Skip(Length/2)" /></div>
     </div>
 </div>
 
 @code{
+    private IEnumerable<Media>? Medias { get; set; } = Enumerable.Empty<Media>();
+    private int Length { get; set; }
+    public string? ErrorMessage { get; set; }
 
+    protected async override Task OnParametersSetAsync()
+    {
+        try
+        {
+            ErrorMessage = "Loading...";
+
+            await base.OnParametersSetAsync();
+
+            Medias = await InstagramService.GetMediasAsync();
+
+            Length = Medias.Count();
+
+            ErrorMessage = null;
+        }
+        catch
+        {
+            ErrorMessage = "Failed to retrieve data.";
+        }
+    }
 }
