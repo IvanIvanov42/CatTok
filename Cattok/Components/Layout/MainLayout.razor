@@ -1,9 +1,9 @@
 ﻿@inherits LayoutComponentBase
 
 <div class="d-flex justify-content-between align-items-center pt-2 px-5 mb-0">
-    <div style="width:36px;">&nbsp;</div>
+    <div><a href="/">LOGO</a></div>
     <div>
-        <h3>@@igname</h3>
+        <User />
     </div>
     <div @onclick="@(() => Modal.Show<Information>(options))">
         <img src="img/info.svg" style="width:36px; height:auto;"/>
