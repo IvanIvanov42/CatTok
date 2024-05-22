@@ -5,7 +5,6 @@ using Cattok_API.Data.Repository;
 using Cattok_API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -42,7 +41,6 @@ builder.Services.AddIdentity<InstagramUser, IdentityRole>()
 builder.Services.AddScoped<IMediaRepository, MediaRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -100,14 +98,13 @@ const string policy = "defaultPolicy";
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(policy,
-                      p =>
-                      {
-                          p.AllowAnyHeader();
-                          p.AllowAnyMethod();
-                          p.AllowAnyHeader();
-                          p.AllowAnyOrigin();
-                      });
+    options.AddPolicy(MyAllowSpecificOrigins,
+        policy =>
+        {
+            policy.WithOrigins("https://cattoka.azurewebsites.net","https://localhost:7074") // Replace with your web app's URL
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
 });
 
 var app = builder.Build();
@@ -121,12 +118,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors(policy);
+app.UseCors(MyAllowSpecificOrigins);
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseCors(MyAllowSpecificOrigins);
 
 app.MapControllers();
 
