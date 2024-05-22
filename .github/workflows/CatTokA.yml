@@ -3,6 +3,8 @@ on:
   push:
     branches:
     - master
+    paths:
+    - 'CatTok/**'
 env:
   AZURE_WEBAPP_NAME: CatTokA
   AZURE_WEBAPP_PACKAGE_PATH: .\published
