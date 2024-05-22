@@ -3,8 +3,6 @@ on:
   push:
     branches:
     - master
-    paths:
-    - 'Cattok-API/**'
 env:
   AZURE_WEBAPP_NAME: CatTok-API20240515235936
   AZURE_WEBAPP_PACKAGE_PATH: .\published
