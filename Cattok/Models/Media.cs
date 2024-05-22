@@ -1,17 +1,18 @@
-﻿namespace CatTok.Models
+﻿using System.Text.Json.Serialization;
+
+namespace CatTok.Models
 {
     public class Media
     {
-        public int Id { get; set; }
-        public Type MediaType { get; set; }
-        public string MediaURL { get; set; }
+        [JsonPropertyName("id")]
+        public required string Id { get; set; }
+        [JsonPropertyName("media_type")]
+        public required string MediaType { get; set; }
+        [JsonPropertyName("media_url")]
+        public required string MediaUrl { get; set; }
+        [JsonPropertyName("caption")]
         public string? Caption { get; set; }
-        public string TimeStamp { get; set; }
-    }
-
-    public enum Type
-    {
-        IMAGE,
-        VIDEO
+        [JsonPropertyName("timestamp")]
+        public required string Timestamp { get; set; }
     }
 }

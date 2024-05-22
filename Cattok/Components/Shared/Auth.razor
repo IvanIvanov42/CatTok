@@ -1,6 +1,6 @@
 ﻿@page "/auth"
 @inject NavigationManager NavigationManager
-@inject IInstagramService instagramService
+@inject IInstagramService InstagramService
 
 @code {
     [SupplyParameterFromQuery]
@@ -9,7 +9,7 @@
     {
         if (Code != null)
         {
-            var response = await instagramService.SendAuthorizationToken(Code);
+            var response = await InstagramService.SendAuthorizationToken(Code);
             if (response.IsSuccessStatusCode)
             {
                 // Handle success
