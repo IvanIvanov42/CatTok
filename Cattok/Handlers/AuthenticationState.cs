@@ -1,4 +1,4 @@
-﻿namespace CatTok.Services
+﻿namespace CatTok.Handlers
 {
     public class AuthenticationState
     {
