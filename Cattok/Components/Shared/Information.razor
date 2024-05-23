@@ -1,32 +1,61 @@
 ﻿@inject NavigationManager NavigationManager
-@inject IConfiguration Configuration
+@inject SecretClient SecretClient
+@inject IAuthenticationService AuthenticationService;
+@inject AuthenticationState AuthenticationState
+
 
 <div class="container">
     <div class="row">
         <h1 class="text-center">CatTok</h1>
     </div>
-    <div class="row" style="font-size:20px;margin-bottom: 60px;">
-        <p>CatTok is the best website in the world!<br/>
-        Embark on an adventure to uncover a myriad of enchanting felines!</p>
+    <div class="row">
+        <p style="font-size:20px;">
+            CatTok is the best website in the world!<br />
+            Embark on an adventure to uncover a myriad of enchanting felines!
+        </p>
 
         <div>
-            How to show-off your cat?
-            <ul style="list-style-image: url('img/cat.svg');">
-                <li>Connect your cat’s IG account!</li>
-                <li>Use a spare phone to showcase your cat!</li>
-            </ul>
+            @if (AuthenticationState.IsLoggedIn)
+            {
+                <p>
+                    How to show-off your cat?
+                </p>
+                <ul style="list-style-image: url('img/cat.svg');">
+                    <li>Connect your cat’s IG account!</li>
+                    <li>Use a spare phone to showcase your cat!</li>
+                </ul>
+                <div class="row justify-content-center" style="margin-top: 60px;">
+                    <button class="btn btn-outline-dark btn-lg" type="button" @onclick="CallInstagram">Connect</button>
+                </div>
+            }
+            else
+            {
+                <p>
+                    Please log in to connect your cat!
+                </p>
+                <Login />
+            }
         </div>
-    </div>
-    <div class="row justify-content-center">
-        <button class="btn btn-outline-dark btn-lg" type="button" @onclick="CallInstagram">Connect</button>
     </div>
 </div>
 
+
 @code {
+    protected override void OnInitialized()
+    {
+        AuthenticationState.AuthenticationStateChanged += StateHasChanged;
+        base.OnInitialized();
+    }
+
+    public void Dispose()
+    {
+        AuthenticationState.AuthenticationStateChanged -= StateHasChanged;
+    }
+
     void CallInstagram()
     {
-        var clientId = Configuration["ClientId"];
-        var redirectId = Configuration["RedirectUri"];
+        var clientId = SecretClient.GetSecret("FEClientId").Value.Value;
+        var redirectId = SecretClient.GetSecret("FERedirectUri").Value.Value;
         NavigationManager.NavigateTo($"https://api.instagram.com/oauth/authorize?client_id={clientId}&redirect_uri={redirectId}&scope=user_profile,user_media&response_type=code");
     }
 }

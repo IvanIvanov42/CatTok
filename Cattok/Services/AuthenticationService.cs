@@ -1,4 +1,5 @@
 ﻿using Blazored.LocalStorage;
+using CatTok.Handlers;
 using CatTok.Models;
 using CatTok.Services.IServices;
 using System.IdentityModel.Tokens.Jwt;
@@ -28,6 +29,17 @@ namespace CatTok.Services
             _factory = factory;
             _localStorageService = localStorageService;
             _authenticationState = authenticationState;
+        }
+
+        public async Task InitializeAsync()
+        {
+            var jwt = await _localStorageService.GetItemAsync<string>(JWT_KEY);
+            if (!string.IsNullOrEmpty(jwt))
+            {
+                var username = GetUsername(jwt);
+                _authenticationState.SetUser(username);
+                LoginChange?.Invoke(username);
+            }
         }
 
         public async ValueTask<string> GetJwtAsync()

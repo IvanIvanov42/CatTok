@@ -1,0 +1,64 @@
+﻿@page "/login"
+@inject IAuthenticationService AuthenticationService
+
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <fieldset disabled="@(expiration is not null)">
+                <EditForm Model="@model" OnValidSubmit="SubmitAsync">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username:</label>
+                        <InputText @bind-Value="@model.Username" id="username" name="username" class="form-control form-control-lg" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password:</label>
+                        <InputText type="password" @bind-Value="@model.Password" id="password" name="password" class="form-control form-control-lg" required />
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-dark btn-lg" disabled="@isSubmitting">Login</button>
+                    </div>
+                </EditForm>
+            </fieldset>
+
+            @if (expiration is not null)
+            {
+                <div class="alert alert-success mt-3" role="alert">
+                    You are logged in till @expiration?.ToLongTimeString()
+                </div>
+            }
+
+            @if (errorMsg is not null)
+            {
+                <div class="alert alert-danger mt-3" role="alert">
+                    @errorMsg
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private LoginModel model = new LoginModel();
+    private DateTime? expiration;
+    private string? errorMsg;
+    private bool isSubmitting = false;
+
+    private async Task SubmitAsync()
+    {
+        try
+        {
+            isSubmitting = true;
+            expiration = await AuthenticationService.LoginAsync(model);
+            errorMsg = null;
+        }
+        catch (Exception ex)
+        {
+            expiration = null;
+            errorMsg = ex.Message;
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

@@ -1,0 +1,8 @@
+﻿@inject IAuthenticationService AuthenticationService
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthenticationService.InitializeAsync();
+    }
+}
