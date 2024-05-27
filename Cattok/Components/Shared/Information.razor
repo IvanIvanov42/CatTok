@@ -1,5 +1,5 @@
 ﻿@inject NavigationManager NavigationManager
-@inject SecretClient SecretClient
+@inject HttpClient HttpClient
 @inject IAuthenticationService AuthenticationService
 @inject AuthenticationState AuthenticationState
 
@@ -16,9 +16,7 @@
         <div>
             @if (AuthenticationState.IsLoggedIn)
             {
-                <p>
-                    How to show-off your cat?
-                </p>
+                <p>How to show-off your cat?</p>
                 <ul style="list-style-image: url('img/cat.svg');">
                     <li>Connect your cat’s IG account!</li>
                     <li>Use a spare phone to showcase your cat!</li>
@@ -29,9 +27,7 @@
             }
             else
             {
-                <p>
-                    Please log in to connect your cat!
-                </p>
+                <p>Please log in to connect your cat!</p>
                 <Login />
             }
         </div>
@@ -39,8 +35,6 @@
 </div>
 
 @code {
-    string clientId;
-    string redirectUri;
     protected override void OnInitialized()
     {
         AuthenticationState.AuthenticationStateChanged += StateHasChanged;
@@ -55,17 +49,21 @@
     {
         try
         {
-            clientId = (await SecretClient.GetSecretAsync("FEClientId")).Value.Value;
-            redirectUri = (await SecretClient.GetSecretAsync("FERedirectUri-local")).Value.Value;
+            var response = await HttpClient.GetFromJsonAsync<SecretsResponse>("api/Secrets/GetSecrets");
+            var clientId = response.ClientId;
+            var redirectUri = response.RedirectUri;
+
+            NavigationManager.NavigateTo($"https://api.instagram.com/oauth/authorize?client_id={clientId}&redirect_uri={redirectUri}&scope=user_profile,user_media&response_type=code");
         }
         catch (Exception ex)
         {
-            // Handle exception
             Console.WriteLine($"Error fetching secrets: {ex.Message}");
         }
-        finally
-        {
-            NavigationManager.NavigateTo($"https://api.instagram.com/oauth/authorize?client_id={clientId}&redirect_uri={redirectUri}&scope=user_profile,user_media&response_type=code");
-        }
+    }
+
+    public class SecretsResponse
+    {
+        public string ClientId { get; set; }
+        public string RedirectUri { get; set; }
     }
 }
