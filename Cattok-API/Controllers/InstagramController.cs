@@ -1,4 +1,5 @@
-﻿using Cattok_API.Data.Models;
+﻿using Azure.Security.KeyVault.Secrets;
+using Cattok_API.Data.Models;
 using Cattok_API.Data.Repository;
 using Cattok_API.Models;
 using Cattok_API.Services;
@@ -19,11 +20,13 @@ namespace Cattok_API.Controllers
     {
         private readonly IInstagramService _instagramService;
         private readonly IMediaRepository _dataStorage;
+        private readonly SecretClient _secretClient;
 
-        public InstagramController(IInstagramService instagramService, IMediaRepository dataStorage)
+        public InstagramController(IInstagramService instagramService, IMediaRepository dataStorage, SecretClient secretClient)
         {
             _instagramService = instagramService;
             _dataStorage = dataStorage;
+            _secretClient = secretClient;
         }
 
         [HttpGet("GetInstagramData")]
@@ -48,6 +51,28 @@ namespace Cattok_API.Controllers
                 // Log the exception
                 Console.WriteLine(ex);
                 return StatusCode(500, "Internal Server Error");
+            }
+        }
+
+        [HttpGet("GetSecrets")]
+        public async Task<IActionResult> GetSecrets()
+        {
+            try
+            {
+                KeyVaultSecret secretClientId = await _secretClient.GetSecretAsync("FEClientId");
+                KeyVaultSecret secretRedirectUri = await _secretClient.GetSecretAsync("FERedirectUri");
+
+                var response = new SecretResponse
+                {
+                    ClientId = secretClientId.Value,
+                    RedirectUri = secretRedirectUri.Value
+                };
+
+                return Ok(response);
+            }
+            catch
+            {
+                return NotFound();
             }
         }
 
