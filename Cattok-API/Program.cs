@@ -94,14 +94,12 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-const string policy = "defaultPolicy";
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("https://cattoka.azurewebsites.net","https://localhost:7074") // Replace with your web app's URL
+            policy.WithOrigins("https://cattoka.azurewebsites.net")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
@@ -117,6 +115,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseRouting();
 
 app.UseCors(MyAllowSpecificOrigins);
 
