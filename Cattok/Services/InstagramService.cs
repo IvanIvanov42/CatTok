@@ -19,6 +19,12 @@ namespace CatTok.Services
             return allMedias.Where(media => media.MediaType == "IMAGE");
         }
 
+        public async Task<SecretsResponse> GetSecrets()
+        {
+            var response = await _httpClient.GetFromJsonAsync<SecretsResponse>("api/Instagram/GetSecrets");
+            return response;
+        }
+
         public string GetUser()
         {
             throw new NotImplementedException();
