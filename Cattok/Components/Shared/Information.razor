@@ -1,8 +1,7 @@
 ﻿@inject NavigationManager NavigationManager
 @inject SecretClient SecretClient
-@inject IAuthenticationService AuthenticationService;
+@inject IAuthenticationService AuthenticationService
 @inject AuthenticationState AuthenticationState
-
 
 <div class="container">
     <div class="row">
@@ -39,12 +38,12 @@
     </div>
 </div>
 
-
 @code {
+    string clientId;
+    string redirectUri;
     protected override void OnInitialized()
     {
         AuthenticationState.AuthenticationStateChanged += StateHasChanged;
-        base.OnInitialized();
     }
 
     public void Dispose()
@@ -52,10 +51,21 @@
         AuthenticationState.AuthenticationStateChanged -= StateHasChanged;
     }
 
-    void CallInstagram()
+    protected async Task CallInstagram()
     {
-        var clientId = SecretClient.GetSecret("FEClientId").Value.Value;
-        var redirectId = SecretClient.GetSecret("FERedirectUri").Value.Value;
-        NavigationManager.NavigateTo($"https://api.instagram.com/oauth/authorize?client_id={clientId}&redirect_uri={redirectId}&scope=user_profile,user_media&response_type=code");
+        try
+        {
+            clientId = (await SecretClient.GetSecretAsync("FEClientId")).Value.Value;
+            redirectUri = (await SecretClient.GetSecretAsync("FERedirectUri-local")).Value.Value;
+        }
+        catch (Exception ex)
+        {
+            // Handle exception
+            Console.WriteLine($"Error fetching secrets: {ex.Message}");
+        }
+        finally
+        {
+            NavigationManager.NavigateTo($"https://api.instagram.com/oauth/authorize?client_id={clientId}&redirect_uri={redirectUri}&scope=user_profile,user_media&response_type=code");
+        }
     }
 }
