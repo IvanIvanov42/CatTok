@@ -27,6 +27,7 @@ namespace Cattok_API.Controllers
         }
 
         [HttpGet("GetInstagramData")]
+		[AllowAnonymous]
         public async Task<IActionResult> GetInstagramData()
         {
             try
