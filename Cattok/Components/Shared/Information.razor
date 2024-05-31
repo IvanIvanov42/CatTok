@@ -1,5 +1,4 @@
 ﻿@inject NavigationManager NavigationManager
-@inject IInstagramService InstagramService
 @inject IAuthenticationService AuthenticationService
 @inject AuthenticationState AuthenticationState
 
@@ -45,19 +44,12 @@
         AuthenticationState.AuthenticationStateChanged -= StateHasChanged;
     }
 
-    protected async Task CallInstagram()
+    protected void CallInstagram()
     {
-        try
-        {
-            var response = await InstagramService.GetSecrets();
-            var clientId = response.ClientId;
-            var redirectUri = response.RedirectUri;
+        var clientId = "218400594602757";
+        var redirectUri = "https://cattoka.azurewebsites.net";
 
-            NavigationManager.NavigateTo($"https://api.instagram.com/oauth/authorize?client_id={clientId}&redirect_uri={redirectUri}&scope=user_profile,user_media&response_type=code");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error fetching secrets: {ex.Message}");
-        }
+        NavigationManager.NavigateTo($"https://api.instagram.com/oauth/authorize?client_id={clientId}&redirect_uri={redirectUri}&scope=user_profile,user_media&response_type=code");
+        
     }
 }
