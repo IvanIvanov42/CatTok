@@ -7,6 +7,5 @@ namespace CatTok.Services.IServices
         Task<HttpResponseMessage> SendAuthorizationToken(string token);
         string GetUser();
         Task<IEnumerable<Media>?> GetMediasAsync();
-        Task<SecretsResponse> GetSecrets();
     }
 }
