@@ -47,7 +47,7 @@
     protected void CallInstagram()
     {
         var clientId = "218400594602757";
-        var redirectUri = "https://cattoka.azurewebsites.net";
+        var redirectUri = "https://cattoka.azurewebsites.net/auth";
 
         NavigationManager.NavigateTo($"https://api.instagram.com/oauth/authorize?client_id={clientId}&redirect_uri={redirectUri}&scope=user_profile,user_media&response_type=code");
         
