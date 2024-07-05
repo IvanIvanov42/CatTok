@@ -13,17 +13,21 @@ namespace Cattok_API.Data.Repository
             this._dbContext = dbContext;
         }
 
-        public async Task<List<Media>> GetMediaListAsync()
+        public async Task<List<Media>> GetMediaListAsync(string userId)
         {
-            return await _dbContext.Medias.ToListAsync();
+            return await _dbContext.Medias
+                                   .Where(m => m.UserId == userId)
+                                   .ToListAsync();
         }
 
-        public async Task AddMediaAsync(List<Media> mediaList)
+        public async Task AddMediaAsync(string userId, List<Media> mediaList)
         {
-            var mediaIds = mediaList.Select(m => m.Id);
+            var mediaIds = mediaList.Select(m => m.Id).ToList();
             var existingMedias = await _dbContext.Medias
-                                                 .Where(m => mediaIds.Contains(m.Id))
+                                                 .Where(m => mediaIds.Contains(m.Id) && m.UserId == userId)
                                                  .ToListAsync();
+
+            var newMedias = new List<Media>();
 
             foreach (var newMedia in mediaList)
             {
@@ -35,8 +39,14 @@ namespace Cattok_API.Data.Repository
                 }
                 else
                 {
-                    await _dbContext.Medias.AddAsync(newMedia);
+                    newMedia.UserId = userId;
+                    newMedias.Add(newMedia);
                 }
+            }
+
+            if (newMedias.Count > 0)
+            {
+                await _dbContext.Medias.AddRangeAsync(newMedias);
             }
 
             await _dbContext.SaveChangesAsync();

@@ -19,7 +19,14 @@ namespace Cattok_API.Data.Context
         {
             KeyVaultSecret secretSqlConnection = _secretClient.GetSecret("SQL-CATTOK");
             string azureSqlConnection = secretSqlConnection.Value;
-            optionsBuilder.UseSqlServer(azureSqlConnection);
+
+            optionsBuilder.UseSqlServer(azureSqlConnection, sqlServerOptionsAction: sqlOptions =>
+            {
+                sqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 5,
+                    maxRetryDelay: TimeSpan.FromSeconds(30),
+                    errorNumbersToAdd: null);
+            });
         }
 
         public DbSet<Media> Medias { get; set; }
