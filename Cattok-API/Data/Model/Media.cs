@@ -16,5 +16,10 @@ namespace Cattok_API.Data.Models
         public string? Caption { get; set; }
         [JsonPropertyName("timestamp")]
         public required string Timestamp { get; set; }
+
+        public required string UserId { get; set; }
+
+        [ForeignKey("UserId")]
+        public InstagramUser User { get; set; }
     }
 }
