@@ -1,37 +1,84 @@
 ﻿@page "/"
 @inject IInstagramService InstagramService
 
-
-<div class="container-fluid text-center">
+<div class="container-fluid text-center" @onwheel="OnScroll">
     <div class="row">
-        <div class="col-md"><MediaDisplay Medias="@Medias.Take(Length/2)"/></div>
-        <div class="col-md-6">hey</div>
-        <div class="col-md"><MediaDisplay Medias="@Medias.Skip(Length/2)" /></div>
+        <div class="col-md-12">
+            @if (SelectedUser != null)
+            {
+                <MediaDisplay Medias="@SelectedUser.Medias" />
+            }
+            else
+            {
+                <p>@ErrorMessage</p>
+            }
+        </div>
     </div>
 </div>
 
-@code{
-    private IEnumerable<Media>? Medias { get; set; } = Enumerable.Empty<Media>();
-    private int Length { get; set; }
+@code {
+    private List<InstagramUser>? Users { get; set; }
+    private InstagramUser? SelectedUser { get; set; }
+    private int CurrentUserIndex { get; set; } = 0;
     public string? ErrorMessage { get; set; }
 
-    protected async override Task OnParametersSetAsync()
+    [CascadingParameter] public string? SelectedUsername { get; set; }
+    [CascadingParameter] public Action<string>? SetSelectedUsername { get; set; }
+
+    protected async override Task OnInitializedAsync()
     {
         try
         {
             ErrorMessage = "Loading...";
 
-            await base.OnParametersSetAsync();
+            var users = await InstagramService.GetUsersWithMediaAsync();
 
-            Medias = await InstagramService.GetMediasAsync();
-
-            Length = Medias.Count();
+            if (users != null && users.Any())
+            {
+                Users = users.ToList();
+                SelectedUser = Users[CurrentUserIndex];
+                SetSelectedUsername?.Invoke(SelectedUser.InstagramUsername);
+            }
 
             ErrorMessage = null;
         }
         catch
         {
             ErrorMessage = "Failed to retrieve data.";
+        }
+    }
+
+    private void OnScroll(WheelEventArgs e)
+    {
+        if (e.DeltaY > 0) // Scrolling down
+        {
+            LoadNextUser();
+        }
+        else if (e.DeltaY < 0) // Scrolling up
+        {
+            LoadPreviousUser();
+        }
+    }
+
+    private void LoadNextUser()
+    {
+        if (Users != null && CurrentUserIndex < Users.Count - 1)
+        {
+            CurrentUserIndex++;
+            SelectedUser = Users[CurrentUserIndex];
+            SetSelectedUsername?.Invoke(SelectedUser.InstagramUsername);
+            StateHasChanged();
+        }
+    }
+
+    private void LoadPreviousUser()
+    {
+        if (Users != null && CurrentUserIndex > 0)
+        {
+            CurrentUserIndex--;
+            SelectedUser = Users[CurrentUserIndex];
+            SetSelectedUsername?.Invoke(SelectedUser.InstagramUsername);
+            StateHasChanged();
         }
     }
 }
