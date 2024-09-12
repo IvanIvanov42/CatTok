@@ -74,7 +74,7 @@ namespace WebApiAuthentication.Controllers
             if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
                 return Unauthorized();
 
-            JwtSecurityToken token = GenerateJwt(model.Username);
+            JwtSecurityToken token = GenerateJwt(user.Id, model.Username);
 
             var refreshToken = GenerateRefreshToken();
 
@@ -111,7 +111,7 @@ namespace WebApiAuthentication.Controllers
             if (user is null || user.RefreshToken != model.RefreshToken || user.RefreshTokenExpiry < DateTime.UtcNow)
                 return Unauthorized();
 
-            var token = GenerateJwt(principal.Identity.Name);
+            var token = GenerateJwt(user.Id, principal.Identity.Name);
 
             _logger.LogInformation("Refresh succeeded");
 
@@ -166,11 +166,12 @@ namespace WebApiAuthentication.Controllers
             return new JwtSecurityTokenHandler().ValidateToken(token, validation, out _);
         }
 
-        private JwtSecurityToken GenerateJwt(string username)
+        private JwtSecurityToken GenerateJwt(string userId, string username)
         {
             var authClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, username),
+                new Claim(JwtRegisteredClaimNames.Sub, userId),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
