@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http;
 using Azure.Security.KeyVault.Secrets;
+using Azure.Core;
 
 public class InstagramService : IInstagramService
 {
@@ -17,7 +18,7 @@ public class InstagramService : IInstagramService
         _secretClient = secretClient ?? throw new ArgumentNullException(nameof(secretClient));
     }
 
-    public async Task<List<Media>?> GetInstagramDataAsync(string accessToken)
+    public async Task<List<Media>?> GetInstagramDataAsync(string accessToken, string userId)
     {
         string apiUrl = $"https://graph.instagram.com/me/media?fields=id,media_type,media_url,caption,timestamp&access_token={accessToken}";
 
@@ -25,12 +26,40 @@ public class InstagramService : IInstagramService
 
         if (response.IsSuccessStatusCode)
         {
-            var instagramResponse = await response.Content.ReadFromJsonAsync<InstagramResponseModel>();
+            var instagramResponse = await response.Content.ReadFromJsonAsync<InstagramMediaResponse>();
 
             if (instagramResponse == null || instagramResponse.data == null)
                 return null;
 
+            foreach (var media in instagramResponse.data)
+            {
+                media.UserId = userId;
+            }
+
+
             return instagramResponse.data;
+        }
+        else
+        {
+            Console.WriteLine(response.StatusCode.ToString());
+            return null;
+        }
+    }
+
+    public async Task<string?> GetInstagramUsername(string accessToken)
+    {
+        string apiUrl = $"https://graph.instagram.com/me?fields=id,username&access_token={accessToken}";
+
+        HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var instagramResponse = await response.Content.ReadFromJsonAsync<InstagramProfileResponse>();
+
+            if (instagramResponse == null || instagramResponse.Username == null)
+                return null;
+
+            return instagramResponse.Username;
         }
         else
         {

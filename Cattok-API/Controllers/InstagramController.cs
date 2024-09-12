@@ -7,6 +7,7 @@ using Cattok_API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,10 +55,57 @@ namespace Cattok_API.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpGet("GetUsersMedia")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetUsersMedia()
+        {
+            var users = await _userManager.Users
+                .Where(u => u.Medias.Any())
+                .Select(u => new
+                {
+                    u.Id,
+                    u.InstagramUsername,
+                    Medias = u.Medias.Select(m => new
+                    {
+                        m.Id,
+                        m.MediaType,
+                        m.MediaUrl,
+                        m.Caption,
+                        m.Timestamp
+                    })
+                }).ToListAsync();
+
+            return Ok(users);
+        }
+
+        [HttpGet("IsConnected")]
+        public async Task<IActionResult> IsUserConnected()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var isConnected = !string.IsNullOrEmpty(user.InstagramToken) && !user.IsInstagramTokenExpired();
+            return Ok(new { isConnected });
+        }
+
+        [HttpPost("PostInstagramData")]
         public async Task<IActionResult> PostInstagramData()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null)
@@ -65,18 +113,16 @@ namespace Cattok_API.Controllers
                 return NotFound("User not found.");
             }
 
-            // get user token
             var token = user.InstagramToken;
 
             if (string.IsNullOrEmpty(token))
             {
-                // Handle the case where the access token is not available
                 return StatusCode(500, "Instagram access token not found.");
             }
 
             try
             {
-                var instagramData = await _instagramService.GetInstagramDataAsync(token);
+                var instagramData = await _instagramService.GetInstagramDataAsync(token, userId);
                 await _dataStorage.AddMediaAsync(userId, instagramData);
                 return Ok("Data posted successfully");
             }
@@ -91,14 +137,6 @@ namespace Cattok_API.Controllers
         [HttpPost("AuthorizeUser")]
         public async Task<IActionResult> AuthorizeUser([FromBody] string token)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var user = await _userManager.FindByIdAsync(userId);
-
-            if (user == null)
-            {
-                return NotFound("User not found.");
-            }
-
             if (string.IsNullOrWhiteSpace(token))
             {
                 return BadRequest("Authorization code is required.");
@@ -120,6 +158,27 @@ namespace Cattok_API.Controllers
                     return Unauthorized("Could not convert to long-lived token.");
                 }
 
+                var instagramUsername = await _instagramService.GetInstagramUsername(longLivedToken);
+
+                if (string.IsNullOrEmpty(instagramUsername))
+                {
+                    return Unauthorized("Could not get instagram username.");
+                }
+
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return BadRequest("User ID is missing.");
+                }
+
+                var user = await _userManager.FindByIdAsync(userId);
+
+                if (user == null)
+                {
+                    return NotFound("User not found.");
+                }
+
+                user.InstagramUsername = instagramUsername;
                 user.InstagramToken = longLivedToken;
                 user.InstagramTokenExpiry = DateTime.UtcNow.AddDays(60);
 
