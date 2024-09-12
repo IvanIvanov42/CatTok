@@ -1,16 +1,25 @@
 ﻿@page "/medias"
 @inject IInstagramService InstagramService
+@inject IJSRuntime JS
 
-<div class="d-flex flex-wrap">
+<div class="masonry">
     @foreach (var media in Medias)
     {
-        <div class="col-6">
-            <MediaContent Media="@media" />
-        </div>
+        @if (media.MediaType == "IMAGE")
+        {
+            <div class="masonry-item">
+                <MediaContent Media="@media" />
+            </div>
+        }
     }
 </div>
 
 @code {
     [Parameter]
     public IEnumerable<Media>? Medias { get; set; } = Enumerable.Empty<Media>();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await JS.InvokeVoidAsync("masonryLayout");
+    }
 }
