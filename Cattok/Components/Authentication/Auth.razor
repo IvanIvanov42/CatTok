@@ -3,26 +3,44 @@
 @inject IInstagramService InstagramService
 
 @code {
-    [SupplyParameterFromQuery]
+    [SupplyParameterFromQuery(Name = "code")]
     public string? Code { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
-        if (Code != null)
+        if (!string.IsNullOrEmpty(Code))
         {
-            var response = await InstagramService.SendAuthorizationToken(Code);
-            if (response.IsSuccessStatusCode)
+            try
             {
-                // Handle success
-                var result = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"Message: {result}");
+                var response = await InstagramService.SendAuthorizationToken(Code);
+                if (response.IsSuccessStatusCode)
+                {
+                    var postData = await InstagramService.PostInstagramData();
+                    if (postData.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine($"Message: {postData}");
+                        NavigationManager.NavigateTo("/");
+                    }
+                    else
+                    {
+                        var result = await postData.Content.ReadAsStringAsync();
+                        Console.WriteLine($"Error posting data: {result}");
+                    }
+                }
+                else
+                {
+                    var result = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Error getting authorization token: {result}");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                // Handle failure
-                var result = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"Error: {result}");
+                Console.WriteLine($"Exception: {ex.Message}");
             }
         }
-
+        else
+        {
+            Console.WriteLine("Authorization code not found.");
+        }
     }
 }
