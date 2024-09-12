@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Cattok_API.Migrations
 {
     [DbContext(typeof(MediaContext))]
-    [Migration("20240620140432_AddInstagramTokenToUsers")]
-    partial class AddInstagramTokenToUsers
+    [Migration("20240830154003_initialdatabase")]
+    partial class initialdatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,9 +35,6 @@ namespace Cattok_API.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "caption");
 
-                    b.Property<string>("InstagramUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("MediaType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
@@ -53,9 +50,13 @@ namespace Cattok_API.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "timestamp");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("InstagramUserId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Medias");
                 });
@@ -277,6 +278,9 @@ namespace Cattok_API.Migrations
                     b.Property<DateTime>("InstagramTokenExpiry")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("InstagramUsername")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("RefreshToken")
                         .HasColumnType("nvarchar(max)");
 
@@ -288,9 +292,13 @@ namespace Cattok_API.Migrations
 
             modelBuilder.Entity("Cattok_API.Data.Models.Media", b =>
                 {
-                    b.HasOne("Cattok_API.Authentication.InstagramUser", null)
+                    b.HasOne("Cattok_API.Authentication.InstagramUser", "User")
                         .WithMany("Medias")
-                        .HasForeignKey("InstagramUserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

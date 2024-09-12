@@ -7,17 +7,22 @@ namespace Cattok_API.Data.Models
     public class Media
     {
         [JsonPropertyName("id")]
-        public required string Id { get; set; }
+        public string Id { get; set; } = string.Empty;
+
         [JsonPropertyName("media_type")]
-        public required string MediaType { get; set; }
+        public string MediaType { get; set; } = string.Empty;
+
         [JsonPropertyName("media_url")]
-        public required string MediaUrl { get; set; }
+        public string MediaUrl { get; set; } = string.Empty;
+
         [JsonPropertyName("caption")]
         public string? Caption { get; set; }
-        [JsonPropertyName("timestamp")]
-        public required string Timestamp { get; set; }
 
-        public required string UserId { get; set; }
+        [JsonPropertyName("timestamp")]
+        public string Timestamp { get; set; } = string.Empty;
+
+        [JsonIgnore]
+        public string UserId { get; set; } = string.Empty;
 
         [ForeignKey("UserId")]
         public InstagramUser User { get; set; }

@@ -12,6 +12,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
+using System.Security.Claims;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -70,6 +71,9 @@ var secretClient = new SecretClient(new Uri(keyVaultUrl), credential);
 var secret = secretClient.GetSecret("JWT-Secret").Value.Value;
 var validIssuer = secretClient.GetSecret("JWT-ValidIssuer").Value.Value;
 var validAudience = secretClient.GetSecret("JWT-ValidAudience").Value.Value;
+
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Add("sub", ClaimTypes.NameIdentifier);
 
 builder.Services.AddAuthentication(options =>
 {

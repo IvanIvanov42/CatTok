@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Cattok_API.Migrations
 {
     /// <inheritdoc />
-    public partial class AddInstagramTokenToUsers : Migration
+    public partial class initialdatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -31,10 +31,11 @@ namespace Cattok_API.Migrations
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Discriminator = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false),
-                    InstagramToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    InstagramTokenExpiry = table.Column<DateTime>(type: "datetime2", nullable: true),
                     RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     RefreshTokenExpiry = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    InstagramToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    InstagramTokenExpiry = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    InstagramUsername = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -170,16 +171,17 @@ namespace Cattok_API.Migrations
                     MediaUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Caption = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Timestamp = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    InstagramUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Medias", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Medias_AspNetUsers_InstagramUserId",
-                        column: x => x.InstagramUserId,
+                        name: "FK_Medias_AspNetUsers_UserId",
+                        column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -222,9 +224,9 @@ namespace Cattok_API.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Medias_InstagramUserId",
+                name: "IX_Medias_UserId",
                 table: "Medias",
-                column: "InstagramUserId");
+                column: "UserId");
         }
 
         /// <inheritdoc />
