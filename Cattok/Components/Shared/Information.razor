@@ -1,6 +1,8 @@
 ﻿@inject NavigationManager NavigationManager
 @inject IAuthenticationService AuthenticationService
 @inject AuthenticationState AuthenticationState
+@inject IInstagramService InstagramService
+@inject ILocalStorageService LocalStorage
 
 <div class="container">
     <div class="row">
@@ -15,6 +17,12 @@
         <div>
             @if (AuthenticationState.IsLoggedIn)
             {
+                if (isInstagramConnected)
+                {
+                    <p>Your cat's Instagram is connected!</p>
+                }
+                else
+                {
                 <p>How to show-off your cat?</p>
                 <ul style="list-style-image: url('img/cat.svg');">
                     <li>Connect your cat’s IG account!</li>
@@ -23,6 +31,7 @@
                 <div class="row justify-content-center" style="margin-top: 60px;">
                     <button class="btn btn-outline-dark btn-lg" type="button" @onclick="CallInstagram">Connect</button>
                 </div>
+            }
             }
             else
             {
@@ -34,14 +43,25 @@
 </div>
 
 @code {
-    protected override void OnInitialized()
+    private bool isInstagramConnected;
+
+    protected override async Task OnInitializedAsync()
     {
         AuthenticationState.AuthenticationStateChanged += StateHasChanged;
+        await CheckInstagramConnection();
     }
 
     public void Dispose()
     {
         AuthenticationState.AuthenticationStateChanged -= StateHasChanged;
+    }
+
+    private async Task CheckInstagramConnection()
+    {
+        if (AuthenticationState.IsLoggedIn)
+        {
+            isInstagramConnected = await InstagramService.IsUserConnected();
+        }
     }
 
     protected void CallInstagram()
