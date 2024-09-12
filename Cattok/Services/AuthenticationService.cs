@@ -52,7 +52,7 @@ namespace CatTok.Services
 
         public async Task LogoutAsync()
         {
-            var response = await _factory.CreateClient("CatTokAPI").DeleteAsync("api/authentication/revoke");
+            var response = await _factory.CreateClient("CatTokAPI").DeleteAsync("api/Authentication/Revoke");
 
             await _localStorageService.RemoveItemAsync(JWT_KEY);
             await _localStorageService.RemoveItemAsync(REFRESH_KEY);
@@ -74,7 +74,7 @@ namespace CatTok.Services
 
         public async Task<DateTime> LoginAsync(LoginModel model)
         {
-            var response = await _factory.CreateClient("CatTokAPI").PostAsync("api/authentication/login",
+            var response = await _factory.CreateClient("CatTokAPI").PostAsync("api/Authentication/Login",
                                                         JsonContent.Create(model));
 
             if (!response.IsSuccessStatusCode)
@@ -104,7 +104,7 @@ namespace CatTok.Services
                 RefreshToken = await _localStorageService.GetItemAsync<string>(REFRESH_KEY)
             };
 
-            var response = await _factory.CreateClient("CatTokAPI").PostAsync("api/authentication/refresh",
+            var response = await _factory.CreateClient("CatTokAPI").PostAsync("api/Authentication/Refresh",
                                                         JsonContent.Create(model));
 
             if (!response.IsSuccessStatusCode)

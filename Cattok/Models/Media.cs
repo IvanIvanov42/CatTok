@@ -6,9 +6,9 @@ namespace CatTok.Models
     {
         [JsonPropertyName("id")]
         public required string Id { get; set; }
-        [JsonPropertyName("media_type")]
+        [JsonPropertyName("mediaType")]
         public required string MediaType { get; set; }
-        [JsonPropertyName("media_url")]
+        [JsonPropertyName("mediaUrl")]
         public required string MediaUrl { get; set; }
         [JsonPropertyName("caption")]
         public string? Caption { get; set; }
