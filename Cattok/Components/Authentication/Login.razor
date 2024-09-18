@@ -50,6 +50,7 @@
             isSubmitting = true;
             expiration = await AuthenticationService.LoginAsync(model);
             errorMsg = null;
+            StateHasChanged();
         }
         catch (Exception ex)
         {
