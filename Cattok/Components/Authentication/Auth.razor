@@ -13,7 +13,7 @@
             try
             {
                 var response = await InstagramService.SendAuthorizationToken(Code);
-                if (response.IsSuccessStatusCode)
+                if (response != null)
                 {
                     var postData = await InstagramService.PostInstagramData();
                     if (postData.IsSuccessStatusCode)
@@ -29,8 +29,7 @@
                 }
                 else
                 {
-                    var result = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"Error getting authorization token: {result}");
+                    Console.WriteLine($"Error getting authorization token");
                 }
             }
             catch (Exception ex)
