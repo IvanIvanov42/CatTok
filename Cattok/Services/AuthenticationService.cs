@@ -38,6 +38,7 @@ namespace CatTok.Services
             {
                 var username = GetUsername(jwt);
                 _authenticationState.SetUser(username);
+                await _localStorageService.SetItemAsStringAsync("username", username);
                 LoginChange?.Invoke(username);
             }
         }

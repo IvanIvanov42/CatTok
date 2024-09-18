@@ -19,7 +19,10 @@
             {
                 if (isInstagramConnected)
                 {
+                    <p>Hi @username</p>
                     <p>Your cat's Instagram is connected!</p>
+                    <p>meow @instagramUsername</p>
+                    <button class="btn btn-outline-dark btn-lg" type="button" @onclick="DisconnectInstagram">Disconnect</button>
                 }
                 else
                 {
@@ -44,11 +47,15 @@
 
 @code {
     private bool isInstagramConnected;
+    private string? instagramUsername;
+    private string? username;
 
     protected override async Task OnInitializedAsync()
     {
         AuthenticationState.AuthenticationStateChanged += StateHasChanged;
         await CheckInstagramConnection();
+        username = await LocalStorage.GetItemAsync<string>("username");
+        instagramUsername = await LocalStorage.GetItemAsync<string>("InstagramUsername");
     }
 
     public void Dispose()
@@ -64,12 +71,30 @@
         }
     }
 
+    private async Task DisconnectInstagram()
+    {
+        var response = await InstagramService.UnauthorizeUser();
+        if (response.IsSuccessStatusCode)
+        {
+            await LocalStorage.RemoveItemAsync("InstagramUsername");
+            await LocalStorage.SetItemAsync("isInstagramConnected", false);
+
+            isInstagramConnected = false;
+            instagramUsername = null;
+
+            StateHasChanged();
+        }
+        else
+        {
+            Console.WriteLine("Failed to disconnect Instagram account.");
+        }
+    }
+
     protected void CallInstagram()
     {
         var clientId = "218400594602757";
         var redirectUri = "https://cattoka.azurewebsites.net/auth";
 
         NavigationManager.NavigateTo($"https://api.instagram.com/oauth/authorize?client_id={clientId}&redirect_uri={redirectUri}&scope=user_profile,user_media&response_type=code");
-        
     }
 }

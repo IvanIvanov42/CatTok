@@ -51,5 +51,14 @@ namespace Cattok_API.Data.Repository
 
             await _dbContext.SaveChangesAsync();
         }
+
+        public async Task DeleteMediaAsync(string userId)
+        {
+            var existingMedias = _dbContext.Medias.Where(m => m.UserId == userId);
+
+            _dbContext.Medias.RemoveRange(existingMedias);
+
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }

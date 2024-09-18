@@ -97,6 +97,37 @@ namespace Cattok_API.Controllers
             return Ok(new { isConnected });
         }
 
+        [HttpDelete("UnauthorizeUser")]
+        public async Task<IActionResult> DisconnectInstagram()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.InstagramToken = null;
+            user.InstagramUsername = null;
+            user.InstagramTokenExpiry = null;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                return StatusCode(500, "Could not unauthorize user.");
+            }
+
+            await _dataStorage.DeleteMediaAsync(userId);
+
+            return NoContent();
+        }
+
         [HttpPost("PostInstagramData")]
         public async Task<IActionResult> PostInstagramData()
         {
@@ -189,7 +220,7 @@ namespace Cattok_API.Controllers
                     return StatusCode(500, "Could not update user with token.");
                 }
 
-                return Ok(new { AccessToken = longLivedToken });
+                return Ok(new { AccessToken = longLivedToken, InstagramUsername = instagramUsername });
             }
             catch (Exception ex)
             {
