@@ -10,7 +10,7 @@ namespace Cattok_API.Authentication
         public DateTime RefreshTokenExpiry { get; set; }
 
         public string? InstagramToken { get; set; }
-        public DateTime InstagramTokenExpiry { get; set; }
+        public DateTime? InstagramTokenExpiry { get; set; }
         public string? InstagramUsername { get; set; }
 
         public bool IsInstagramTokenExpired()

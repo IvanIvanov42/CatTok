@@ -35,10 +35,21 @@ namespace CatTok.Services
         }
 
 
-        public async Task<HttpResponseMessage> SendAuthorizationToken(string token)
+        public async Task<InstagramAuthorizationResponse?> SendAuthorizationToken(string token)
         {
             var response = await _httpClient.PostAsJsonAsync("api/Instagram/AuthorizeUser", token);
-            return response;
+            if (response.IsSuccessStatusCode)
+            {
+                var authResponse = await response.Content.ReadFromJsonAsync<InstagramAuthorizationResponse>();
+                if (!string.IsNullOrEmpty(authResponse?.InstagramUsername))
+                {
+                    await _localStorage.SetItemAsStringAsync("InstagramUsername", authResponse.InstagramUsername);
+                    await _localStorage.SetItemAsync("isInstagramConnected", true);
+                }
+                return authResponse;
+            }
+            else
+                return null;
         }
 
         public async Task<HttpResponseMessage> PostInstagramData()
@@ -65,6 +76,12 @@ namespace CatTok.Services
             }
 
             return false;
+        }
+
+        public async Task<HttpResponseMessage> UnauthorizeUser()
+        {
+            var response = await _httpClient.DeleteAsync("api/Instagram/UnauthorizeUser");
+            return response;
         }
     }
 }
