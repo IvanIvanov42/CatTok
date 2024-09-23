@@ -3,6 +3,7 @@ using CatTok.Handlers;
 using CatTok.Models;
 using CatTok.Services.IServices;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Net.Http.Json;
 using System.Security.Claims;
 
@@ -73,18 +74,21 @@ namespace CatTok.Services
             return jwt.Claims.First(c => c.Type == ClaimTypes.Name).Value;
         }
 
-        public async Task<DateTime> LoginAsync(LoginModel model)
+        public async Task LoginAsync(LoginModel model)
         {
-            var response = await _factory.CreateClient("CatTokAPI").PostAsync("api/Authentication/Login",
-                                                        JsonContent.Create(model));
+            var response = await _factory.CreateClient("CatTokAPI")
+                .PostAsync("api/Authentication/Login", JsonContent.Create(model));
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                throw new UnauthorizedAccessException("Invalid username or password.");
 
             if (!response.IsSuccessStatusCode)
-                throw new UnauthorizedAccessException("Login failed.");
+                throw new Exception("Login failed.");
 
             var content = await response.Content.ReadFromJsonAsync<LoginResponse>();
 
             if (content == null)
-                throw new InvalidDataException();
+                throw new InvalidDataException("Invalid response from login.");
 
             await _localStorageService.SetItemAsync(JWT_KEY, content.JwtToken);
             await _localStorageService.SetItemAsync(REFRESH_KEY, content.RefreshToken);
@@ -93,8 +97,22 @@ namespace CatTok.Services
             _authenticationState.SetUser(username);
 
             LoginChange?.Invoke(username);
+        }
 
-            return content.Expiration;
+
+        public async Task RegisterAsync(RegisterModel model)
+        {
+            var response = await _factory.CreateClient("CatTokAPI")
+                .PostAsync("api/Authentication/Register", JsonContent.Create(model));
+
+            if (response.StatusCode == HttpStatusCode.Conflict)
+                throw new Exception("User already exists.");
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception("Registration failed.");
+
+            // Automatically login
+            await LoginAsync(new LoginModel { Username = model.Username, Password = model.Password });
         }
 
         public async Task<bool> RefreshAsync()

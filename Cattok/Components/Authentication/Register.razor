@@ -1,4 +1,4 @@
-﻿@page "/login"
+﻿@page "/register"
 @inject IAuthenticationService AuthenticationService
 @inject NavigationManager NavigationManager
 
@@ -15,6 +15,11 @@
                         <ValidationMessage For="@(() => model.Username)" />
                     </div>
                     <div class="mb-3">
+                        <label for="email" class="form-label">Email:</label>
+                        <InputText type="email" @bind-Value="@model.Email" id="email" class="form-control form-control-lg" />
+                        <ValidationMessage For="@(() => model.Email)" />
+                    </div>
+                    <div class="mb-3">
                         <label for="password" class="form-label">Password:</label>
                         <InputText type="password" @bind-Value="@model.Password" id="password" class="form-control form-control-lg" />
                         <ValidationMessage For="@(() => model.Password)" />
@@ -24,11 +29,11 @@
                             @if (isSubmitting)
                             {
                                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                <p>Logging in...</p>
+                                <p>Registering...</p>
                             }
                             else
                             {
-                                <p>Login</p>
+                                <p>Register</p>
                             }
                         </button>
                     </div>
@@ -46,7 +51,7 @@
 </div>
 
 @code {
-    private LoginModel model = new LoginModel();
+    private RegisterModel model = new RegisterModel();
     private string? errorMsg;
     private bool isSubmitting = false;
 
@@ -57,7 +62,7 @@
             isSubmitting = true;
             errorMsg = null;
 
-            await AuthenticationService.LoginAsync(model);
+            await AuthenticationService.RegisterAsync(model);
 
             NavigationManager.NavigateTo("/");
         }

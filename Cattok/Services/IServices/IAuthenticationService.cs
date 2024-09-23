@@ -8,7 +8,8 @@ namespace CatTok.Services.IServices
 
         event Action<string?>? LoginChange;
         ValueTask<string> GetJwtAsync();
-        Task<DateTime> LoginAsync(LoginModel model);
+        Task LoginAsync(LoginModel model);
+        Task RegisterAsync(RegisterModel model);
         Task LogoutAsync();
         Task<bool> RefreshAsync();
     }
