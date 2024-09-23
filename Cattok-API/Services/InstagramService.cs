@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http;
 using Azure.Security.KeyVault.Secrets;
 using Azure.Core;
+using Azure.Storage.Blobs;
 
 public class InstagramService : IInstagramService
 {
@@ -31,11 +32,33 @@ public class InstagramService : IInstagramService
             if (instagramResponse == null || instagramResponse.data == null)
                 return null;
 
+            var storageConnectionString = await GetSecretAsync("InstagramMediaBlob-Secret");
+            var containerName = await GetSecretAsync("InstagramMediaBlobName");
+
+            // Create a BlobContainerClient
+            BlobContainerClient containerClient = new BlobContainerClient(storageConnectionString, containerName);
+
             foreach (var media in instagramResponse.data)
             {
                 media.UserId = userId;
-            }
+                if (media.MediaType == "IMAGE")
+                {
+                    // Download the image from Instagram
+                    using (HttpResponseMessage imageResponse = await _httpClient.GetAsync(media.MediaUrl))
+                    {
+                        if (imageResponse.IsSuccessStatusCode)
+                        {
+                            using (var imageStream = await imageResponse.Content.ReadAsStreamAsync())
+                            {
+                                BlobClient blobClient = containerClient.GetBlobClient($"{media.Id}.jpg");
+                                await blobClient.UploadAsync(imageStream, overwrite: true);
 
+                                media.MediaUrl = blobClient.Uri.ToString();
+                            }
+                        }
+                    }
+                }
+            }
 
             return instagramResponse.data;
         }
