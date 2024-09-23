@@ -40,12 +40,22 @@
             {
                 <p>Please log in to connect your cat!</p>
                 <Login />
+                <p>No account?</p>
+                <div @onclick="@(() => Modal.Show<Register>(options))">SIGN UP</div>
             }
         </div>
     </div>
 </div>
 
 @code {
+    [CascadingParameter] public IModalService Modal { get; set; } = default!;
+    ModalOptions options = new ModalOptions()
+        {
+            Size = ModalSize.Large,
+            HideCloseButton = true,
+            HideHeader = true
+        };
+
     private bool isInstagramConnected;
     private string? instagramUsername;
     private string? username;
