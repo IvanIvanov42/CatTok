@@ -13,6 +13,7 @@ using System.Text;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using System.Security.Claims;
+using Cattok_API.Hubs;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -21,6 +22,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+builder.Services.AddSignalR();
 
 var keyVaultUrl = builder.Configuration["KeyVault:VaultUri"];
 var credential = new DefaultAzureCredential();
@@ -104,7 +107,8 @@ builder.Services.AddCors(options =>
         {
             policy.WithOrigins("https://cattoka.azurewebsites.net")
                   .AllowAnyHeader()
-                  .AllowAnyMethod();
+                  .AllowAnyMethod()
+                  .AllowCredentials();
         });
 });
 
@@ -125,6 +129,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<StreamingHub>("/streaminghub").AllowAnonymous();
 
 app.Run();
 

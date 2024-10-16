@@ -1,5 +1,6 @@
 ﻿@page "/streaming"
 @inject IJSRuntime JSRuntime
+@inject IStreamingService StreamingService
 
 
 <video id="livestreamVideo" autoplay playsinline></video>
@@ -10,6 +11,11 @@
 @code {
     private bool isStreaming = false;
 
+    protected override async Task OnInitializedAsync()
+    {
+        await StreamingService.InitializeAsync();
+    }
+
     private async Task StartStreaming()
     {
         bool success = await JSRuntime.InvokeAsync<bool>("streamingFunctions.startStreaming");
@@ -17,6 +23,8 @@
         {
             isStreaming = true;
         }
+
+        await StreamingService.TestStream();
     }
 
     private async Task StopStreaming()
