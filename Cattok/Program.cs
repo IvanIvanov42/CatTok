@@ -24,6 +24,8 @@ builder.Services.AddScoped<AuthenticationState>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IInstagramService, InstagramService>();
 
+builder.Services.AddSingleton<IStreamingService, StreamingService>();
+
 builder.Services.AddAuthorizationCore();
 
 await using var host = builder.Build();
