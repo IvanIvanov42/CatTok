@@ -2,8 +2,9 @@
 {
     public interface IStreamingService
     {
+        bool IsStreaming { get; }
         Task InitializeAsync();
-
-        Task TestStream();
+        Task StartStreamingAsync();
+        Task StopStreamingAsync();
     }
 }

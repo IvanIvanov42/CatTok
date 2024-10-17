@@ -12,6 +12,7 @@ namespace CatTok.Services
         private HubConnection hubConnection;
         private readonly IConfiguration configuration;
         private readonly ILogger<StreamingService> logger;
+        public bool IsStreaming { get; private set; } = false;
 
         public StreamingService(
             IConfiguration configuration, IJSRuntime jSRuntime, ILogger<StreamingService> logger)
@@ -33,7 +34,6 @@ namespace CatTok.Services
                 .WithUrl(hubUrl)
                 .Build();
 
-            hubConnection.On<string>("TestMessage", TestMessage);
 
             try
             {
@@ -46,14 +46,32 @@ namespace CatTok.Services
             }
         }
 
-        public async Task TestStream()
+        public async Task StartStreamingAsync()
         {
-            await hubConnection.InvokeAsync("SendMessage", "testUser", "testMessage");
+            await InitializeAsync();
+
+            // Start local media stream
+            bool started = await jsRuntime.InvokeAsync<bool>("streamingFunctions.startStreaming");
+            if (!started)
+            {
+                IsStreaming = false;
+                return;
+            }
+
+            // Notify server
+            await hubConnection.InvokeAsync("StartStream");
+            IsStreaming = true;
         }
 
-        public async Task TestMessage(string message)
+        public async Task StopStreamingAsync()
         {
-            logger.LogInformation($"Received message from server: {message}");
+            if (!IsStreaming)
+                return;
+
+            await jsRuntime.InvokeVoidAsync("streamingFunctions.stopStreaming");
+
+            await hubConnection.InvokeAsync("StopStream");
+            IsStreaming = false;
         }
     }
 }
