@@ -1,0 +1,87 @@
+﻿@page "/viewer"
+@implements IAsyncDisposable
+@inject IStreamingService StreamingService
+@inject IJSRuntime JSRuntime
+
+<video id="remoteVideo" autoplay playsinline></video>
+
+@code {
+    [Parameter] public string StreamerId { get; set; }
+
+    private bool isViewing = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await StreamingService.InitializeAsync();
+
+        // Set the .NET reference for JavaScript interop
+        var objRef = DotNetObjectReference.Create(this);
+        await JSRuntime.InvokeVoidAsync("streamingFunctions.setDotNetReference", objRef);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await StartViewing();
+    }
+
+    private async Task StartViewing()
+    {
+        if (string.IsNullOrEmpty(StreamerId))
+        {
+            await StopViewing();
+            return;
+        }
+
+        // Check if the streamer is active
+        var activeStreams = await StreamingService.GetActiveStreamsAsync();
+        if (!activeStreams.Contains(StreamerId))
+        {
+            await StopViewing();
+            return;
+        }
+        
+        // Already viewing the current streamer
+        if (isViewing && StreamingService.CurrentStreamerId == StreamerId)
+        {
+            return;
+        }
+
+        if (isViewing)
+        {
+            await StopViewing();
+        }
+
+        isViewing = true;
+        await StreamingService.JoinStreamAsync(StreamerId);
+    }
+
+    private async Task StopViewing()
+    {
+        if (isViewing)
+        {
+            await StreamingService.LeaveStreamAsync();
+            isViewing = false;
+
+            await JSRuntime.InvokeVoidAsync("streamingFunctions.clearRemoteVideo");
+        }
+    }
+
+
+    [JSInvokable]
+    public async Task SendIceCandidate(string connectionId, string candidate)
+    {
+        await StreamingService.SendIceCandidateAsync(connectionId, candidate);
+    }
+
+    [JSInvokable]
+    public async Task SendAnswerToServer(string streamerId, string answer)
+    {
+        await StreamingService.SendAnswerAsync(streamerId, answer);
+        Console.WriteLine("SENDANDSWERTOSERVER: " + streamerId);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await StopViewing();
+    }
+}

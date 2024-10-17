@@ -1,28 +1,33 @@
 ﻿@page "/streaming"
-@inject IJSRuntime JSRuntime
+@inject IAuthenticationService AuthenticationService
 @inject IStreamingService StreamingService
 
 
-<video id="livestreamVideo" autoplay playsinline></video>
+<video id="livestreamVideo" autoplay muted playsinline></video>
 
 <button @onclick="StartStreaming" disabled="@StreamingService.IsStreaming">Start Streaming</button>
 <button @onclick="StopStreaming" disabled="@(!StreamingService.IsStreaming)">Stop Streaming</button>
 
 @code {
-    private bool isStreaming = false;
+    private string userId = "";
 
     protected override async Task OnInitializedAsync()
     {
-        await StreamingService.InitializeAsync();
+        userId = await AuthenticationService.GetUserIdAsync();
     }
 
     private async Task StartStreaming()
     {
-        await StreamingService.StartStreamingAsync();
+        await StreamingService.StartStreaming(userId);
     }
 
     private async Task StopStreaming()
     {
-        await StreamingService.StopStreamingAsync();
+        await StreamingService.StopStreaming(userId);
     }
+
+    // public async ValueTask DisposeAsync()
+    // {
+    //     await StreamingService.StopStreaming(userId);
+    // }
 }
