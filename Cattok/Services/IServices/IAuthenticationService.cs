@@ -12,5 +12,7 @@ namespace CatTok.Services.IServices
         Task RegisterAsync(RegisterModel model);
         Task LogoutAsync();
         Task<bool> RefreshAsync();
+        Task<string> GetUsernameAsync();
+        Task<string?> GetUserIdAsync();
     }
 }

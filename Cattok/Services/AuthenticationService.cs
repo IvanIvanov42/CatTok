@@ -34,14 +34,11 @@ namespace CatTok.Services
 
         public async Task InitializeAsync()
         {
-            var jwt = await _localStorageService.GetItemAsync<string>(JWT_KEY);
-            if (!string.IsNullOrEmpty(jwt))
-            {
-                var username = GetUsername(jwt);
-                _authenticationState.SetUser(username);
-                await _localStorageService.SetItemAsStringAsync("username", username);
-                LoginChange?.Invoke(username);
-            }
+            var username = await GetUsernameAsync();
+            _authenticationState.SetUser(username);
+            await _localStorageService.SetItemAsStringAsync("username", username);
+            LoginChange?.Invoke(username);
+            
         }
 
         public async ValueTask<string> GetJwtAsync()
@@ -68,10 +65,30 @@ namespace CatTok.Services
             LoginChange?.Invoke(null);
         }
 
-        private static string GetUsername(string token)
+        public async Task<string> GetUsernameAsync()
         {
-            var jwt = new JwtSecurityToken(token);
-            return jwt.Claims.First(c => c.Type == ClaimTypes.Name).Value;
+            var jwt = await GetJwtAsync();
+            if (string.IsNullOrEmpty(jwt))
+            {
+                return "Anonymous";
+            }
+
+            var jwtHandler = new JwtSecurityTokenHandler();
+            var token = jwtHandler.ReadJwtToken(jwt);
+            var usernameClaim = token.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
+            return usernameClaim?.Value ?? "Anonymous";
+        }
+
+
+        public async Task<string?> GetUserIdAsync()
+        {
+            var token = await GetJwtAsync();
+            if (string.IsNullOrEmpty(token))
+                return null;
+
+            var jwt = new JwtSecurityTokenHandler().ReadToken(token) as JwtSecurityToken;
+            var userId = jwt?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier || c.Type == JwtRegisteredClaimNames.Sub)?.Value;
+            return userId;
         }
 
         public async Task LoginAsync(LoginModel model)
@@ -93,7 +110,7 @@ namespace CatTok.Services
             await _localStorageService.SetItemAsync(JWT_KEY, content.JwtToken);
             await _localStorageService.SetItemAsync(REFRESH_KEY, content.RefreshToken);
 
-            var username = GetUsername(content.JwtToken);
+            var username = await GetUsernameAsync();
             _authenticationState.SetUser(username);
 
             LoginChange?.Invoke(username);
@@ -141,7 +158,7 @@ namespace CatTok.Services
             await _localStorageService.SetItemAsync(REFRESH_KEY, content.RefreshToken);
 
             _jwtCache = content.JwtToken;
-            _authenticationState.SetUser(GetUsername(content.JwtToken));
+            _authenticationState.SetUser(await GetUsernameAsync());
 
             return true;
         }
