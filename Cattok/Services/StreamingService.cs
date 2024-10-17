@@ -38,7 +38,7 @@ namespace CatTok.Services
                 return;
 
             var serverUrl = configuration["ServerUrl"];
-            var hubUrl = $"{serverUrl}streaminghub";
+            var hubUrl = $"{serverUrl}/streaminghub";
 
             hubConnection = new HubConnectionBuilder()
                 .WithUrl(hubUrl)
