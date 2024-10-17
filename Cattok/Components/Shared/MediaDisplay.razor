@@ -1,6 +1,4 @@
-﻿@page "/medias"
-@inject IInstagramService InstagramService
-@inject IJSRuntime JS
+﻿@inject IJSRuntime JS
 
 <div class="masonry">
     @foreach (var media in Medias)
@@ -20,6 +18,9 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await JS.InvokeVoidAsync("masonryLayout");
+        if (Medias != null && Medias.Any())
+        {
+            await JS.InvokeVoidAsync("masonryLayout");
+        }
     }
 }
