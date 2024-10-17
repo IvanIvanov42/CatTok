@@ -2,7 +2,7 @@ name: Build and deploy .NET Core application to Web App CatTokA
 on:
   push:
     branches:
-    - master
+    - livestreaming
 env:
   AZURE_WEBAPP_NAME: CatTokA
   AZURE_WEBAPP_PACKAGE_PATH: .\published
