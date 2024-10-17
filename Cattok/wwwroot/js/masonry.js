@@ -1,10 +1,11 @@
 function masonryLayout() {
-    var elem = document.querySelector('.masonry');
-    imagesLoaded(elem, function () {
-        var msnry = new Masonry(elem, {
-            itemSelector: '.masonry-item',
-            columnWidth: '.masonry-item',
-            percentPosition: true
+    var elems = document.querySelectorAll('.masonry');
+    elems.forEach(function (elem) {
+        imagesLoaded(elem, function () {
+            new Masonry(elem, {
+                itemSelector: '.masonry-item',
+                percentPosition: true
+            });
         });
     });
 }

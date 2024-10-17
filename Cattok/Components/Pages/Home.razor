@@ -1,18 +1,38 @@
 ﻿@page "/"
+@inject IStreamingService StreamingService
 @inject IInstagramService InstagramService
 
 <div class="container-fluid text-center" @onwheel="OnScroll">
     <div class="row">
-        <div class="col-md-12">
-            @if (SelectedUser != null)
+        @if (SelectedUser != null)
+        {
+            if (isUserStreaming)
             {
-                <MediaDisplay Medias="@SelectedUser.Medias" />
+                <div class="row">
+                    <div class="col-md-4">
+                        <MediaDisplay Medias="@SelectedUser.Medias.Take(SelectedUser.Medias.Count / 2).ToList()" />
+                    </div>
+                    <div class="col-md-4">
+                        <Viewer StreamerId="@SelectedUser.Id" />
+                    </div>
+                    <div class="col-md-4">
+                        <MediaDisplay Medias="@SelectedUser.Medias.Skip(SelectedUser.Medias.Count / 2).ToList()" />
+                    </div>
+                </div>
             }
             else
             {
-                <p>@ErrorMessage</p>
+                <div class="row">
+                    <div class="col-md-12">
+                        <MediaDisplay Medias="@SelectedUser.Medias" />
+                    </div>
+                </div>
             }
-        </div>
+        }
+        else
+        {
+            <p>@ErrorMessage</p>
+        }
     </div>
 </div>
 
@@ -21,6 +41,7 @@
     private InstagramUser? SelectedUser { get; set; }
     private int CurrentUserIndex { get; set; } = 0;
     public string? ErrorMessage { get; set; }
+    private bool isUserStreaming = false;
 
     [CascadingParameter] public string? SelectedUsername { get; set; }
     [CascadingParameter] public Action<string>? SetSelectedUsername { get; set; }
@@ -38,6 +59,7 @@
                 Users = users.ToList();
                 SelectedUser = Users[CurrentUserIndex];
                 SetSelectedUsername?.Invoke(SelectedUser.InstagramUsername);
+                await UpdateIsUserStreaming();
             }
 
             ErrorMessage = null;
@@ -46,9 +68,25 @@
         {
             ErrorMessage = "Failed to retrieve data.";
         }
+
+        // Subscribe to streaming events
+        StreamingService.OnActiveStreamsUpdated += OnActiveStreamsUpdated;
     }
 
-    private void OnScroll(WheelEventArgs e)
+    private async Task UpdateIsUserStreaming()
+    {
+        var activeStreams = await StreamingService.GetActiveStreamsAsync();
+        isUserStreaming = SelectedUser != null && activeStreams.Contains(SelectedUser.Id);
+        StateHasChanged();
+    }
+
+    private void OnActiveStreamsUpdated(List<string> streams)
+    {
+        isUserStreaming = SelectedUser != null && streams.Contains(SelectedUser.Id);
+        StateHasChanged();
+    }
+
+    private async Task OnScroll(WheelEventArgs e)
     {
         if (e.DeltaY > 0) // Scrolling down
         {
@@ -58,6 +96,8 @@
         {
             LoadPreviousUser();
         }
+
+        await UpdateIsUserStreaming();
     }
 
     private void LoadNextUser()
@@ -80,5 +120,10 @@
             SetSelectedUsername?.Invoke(SelectedUser.InstagramUsername);
             StateHasChanged();
         }
+    }
+
+    public void Dispose()
+    {
+        StreamingService.OnActiveStreamsUpdated -= OnActiveStreamsUpdated;
     }
 }
