@@ -6,16 +6,18 @@ namespace Cattok_API.Hubs
     [AllowAnonymous]
     public class StreamingHub : Hub 
     {
-        public override async Task OnConnectedAsync()
+        private static readonly HashSet<string> ActiveStreamers = new HashSet<string>();
+
+        public async Task StartStream()
         {
-            Console.WriteLine("Client connected: " + Context.ConnectionId);
-            await base.OnConnectedAsync();
+            ActiveStreamers.Add(Context.ConnectionId);
+            await Clients.All.SendAsync("StreamerStarted", Context.ConnectionId);
         }
 
-        public async Task SendMessage(string user, string message)  
+        public async Task StopStream()
         {
-            Console.WriteLine($"Received message from {user}: {message}");
-            await Clients.All.SendAsync("TestMessage", message);
+            ActiveStreamers.Remove(Context.ConnectionId);
+            await Clients.All.SendAsync("StreamerStopped", Context.ConnectionId);
         }
     }
 }
