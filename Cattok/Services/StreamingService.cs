@@ -46,6 +46,7 @@ namespace CatTok.Services
 
             // Register event handlers
             hubConnection.On<string>("ViewerJoined", OnViewerJoined);
+            hubConnection.On<string>("ViewerLeft", OnViewerLeft);
             hubConnection.On<string, string>("ReceiveAnswer", OnReceiveAnswer);
             hubConnection.On<string, string>("ReceiveIceCandidate", OnReceiveIceCandidate);
             hubConnection.On("StreamAlreadyActive", OnStreamAlreadyActive);
@@ -91,13 +92,13 @@ namespace CatTok.Services
             OnActiveStreamsUpdated?.Invoke(activeStreams);
         }
 
-        public async Task StartStreaming(string userId)
+        public async Task StartStreaming(string userId, bool audio)
         {
             await InitializeAsync();
 
             try
             {
-                bool started = await jsRuntime.InvokeAsync<bool>("streamingFunctions.startStreaming");
+                bool started = await jsRuntime.InvokeAsync<bool>("streamingFunctions.startStreaming", audio);
                 logger.LogInformation($"startStreaming returned: {started}");
 
                 if (!started)
@@ -296,6 +297,19 @@ namespace CatTok.Services
         private void OnStreamNotAvailable(string streamerId)
         {
             logger.LogWarning($"Stream not available for streamer: {streamerId}");
+        }
+
+        private async Task OnViewerLeft(string viewerConnectionId)
+        {
+            logger.LogInformation($"Viewer left: {viewerConnectionId}");
+            try
+            {
+                await jsRuntime.InvokeVoidAsync("streamingFunctions.handleViewerLeft", viewerConnectionId);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error handling OnViewerLeft.");
+            }
         }
 
         public async ValueTask DisposeAsync()
