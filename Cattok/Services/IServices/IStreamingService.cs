@@ -6,7 +6,7 @@
         string CurrentStreamerId { get; }
 
         Task InitializeAsync();
-        Task StartStreaming(string userId);
+        Task StartStreaming(string userId, bool audio);
         Task StopStreaming(string userId);
 
         Task<List<string>> GetActiveStreamsAsync();

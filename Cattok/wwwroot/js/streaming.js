@@ -10,9 +10,9 @@ window.streamingFunctions = {
         this.dotNetRef = dotNetRef;
     },
 
-    async startStreaming() {
+    async startStreaming(audio) {
         try {
-            this.streaming = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            this.streaming = await navigator.mediaDevices.getUserMedia({ video: true, audio: audio });
             this.attachStream();
             return true;
         } catch (error) {
@@ -66,7 +66,11 @@ window.streamingFunctions = {
 
     async createOffer(connectionId) {
         const pc = this.initializePeerConnection(connectionId);
-        this.streaming.getTracks().forEach(track => pc.addTrack(track, this.streaming));
+
+        if (!pc._tracksAdded) {
+            this.streaming.getTracks().forEach(track => pc.addTrack(track, this.streaming));
+            pc._tracksAdded = true;
+        }
 
         try {
             const offer = await pc.createOffer();
@@ -130,6 +134,13 @@ window.streamingFunctions = {
     },
 
     initializePeerConnection(connectionId) {
+        // Close the existing connection
+        if (this.peerConnections[connectionId]) {
+            console.warn(`PeerConnection already exists for connectionId: ${connectionId}, closing and creating a new one.`);
+            this.peerConnections[connectionId].close();
+            delete this.peerConnections[connectionId];
+        }
+
         const pc = new RTCPeerConnection(this.config);
         this.peerConnections[connectionId] = pc;
 
@@ -140,6 +151,13 @@ window.streamingFunctions = {
         };
 
         return pc;
+    },
+
+    handleViewerLeft(connectionId) {
+        if (this.peerConnections[connectionId]) {
+            this.peerConnections[connectionId].close();
+            delete this.peerConnections[connectionId];
+        }
     },
 
     attachRemoteStream(stream) {

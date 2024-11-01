@@ -5,9 +5,10 @@ using System.Collections.Concurrent;
 namespace Cattok_API.Hubs
 {
     [AllowAnonymous]
-    public class StreamingHub : Hub 
+    public class StreamingHub : Hub
     {
         private static readonly ConcurrentDictionary<string, string> ActiveStreams = new ConcurrentDictionary<string, string>();
+        private static readonly ConcurrentDictionary<string, string> Viewers = new ConcurrentDictionary<string, string>();
 
         public async Task StartStream(string streamerUserId)
         {
@@ -33,6 +34,9 @@ namespace Cattok_API.Hubs
             var streamerConnectionId = ActiveStreams.FirstOrDefault(kvp => kvp.Value == streamerUserId).Key;
             if (streamerConnectionId != null)
             {
+                // Map viewer to streamer
+                Viewers[Context.ConnectionId] = streamerConnectionId;
+
                 // Send a message to the streamer
                 await Clients.Client(streamerConnectionId).SendAsync("ViewerJoined", Context.ConnectionId);
             }
@@ -45,12 +49,12 @@ namespace Cattok_API.Hubs
         public async Task LeaveStream(string streamerUserId)
         {
             // Remove the viewer
-            ActiveStreams.TryRemove(Context.ConnectionId, out _);
+            Viewers.TryRemove(Context.ConnectionId, out _);
 
             var streamerConnectionId = ActiveStreams.FirstOrDefault(kvp => kvp.Value == streamerUserId).Key;
             if (streamerConnectionId != null)
             {
-                // await Clients.Client(streamerConnectionId).SendAsync("ViewerLeft", Context.ConnectionId);
+                await Clients.Client(streamerConnectionId).SendAsync("ViewerLeft", Context.ConnectionId);
             }
 
             await Task.CompletedTask;
@@ -83,7 +87,6 @@ namespace Cattok_API.Hubs
             }
         }
 
-
         // Streamers and viewers exchange ICE candidates
         public async Task SendIceCandidate(string connectionId, string candidate)
         {
@@ -96,6 +99,22 @@ namespace Cattok_API.Hubs
             {
                 Console.WriteLine($"Streamer disconnected: UserId={streamerUserId}, ConnectionId={Context.ConnectionId}");
                 await Clients.All.SendAsync("StreamStopped", streamerUserId);
+
+                // Streamer disconnected
+                var viewers = Viewers.Where(kvp => kvp.Value == Context.ConnectionId).Select(kvp => kvp.Key).ToList();
+                foreach (var viewerConnectionId in viewers)
+                {
+                    await Clients.Client(viewerConnectionId).SendAsync("StreamerDisconnected");
+                    Viewers.TryRemove(viewerConnectionId, out _);
+                }
+            }
+            else
+            {
+                // Viewer disconnected
+                if (Viewers.TryRemove(Context.ConnectionId, out var streamerConnectionId))
+                {
+                    await Clients.Client(streamerConnectionId).SendAsync("ViewerLeft", Context.ConnectionId);
+                }
             }
 
             await base.OnDisconnectedAsync(exception);
