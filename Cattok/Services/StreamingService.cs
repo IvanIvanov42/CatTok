@@ -92,13 +92,13 @@ namespace CatTok.Services
             OnActiveStreamsUpdated?.Invoke(activeStreams);
         }
 
-        public async Task StartStreaming(string userId, bool audio)
+        public async Task StartStreaming(string userId)
         {
             await InitializeAsync();
 
             try
             {
-                bool started = await jsRuntime.InvokeAsync<bool>("streamingFunctions.startStreaming", audio);
+                bool started = await jsRuntime.InvokeAsync<bool>("streamingFunctions.startStreaming");
                 logger.LogInformation($"startStreaming returned: {started}");
 
                 if (!started)

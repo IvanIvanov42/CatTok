@@ -10,9 +10,9 @@ window.streamingFunctions = {
         this.dotNetRef = dotNetRef;
     },
 
-    async startStreaming(audio) {
+    async startStreaming() {
         try {
-            this.streaming = await navigator.mediaDevices.getUserMedia({ video: true, audio: audio });
+            this.streaming = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
             this.attachStream();
             return true;
         } catch (error) {
