@@ -1,17 +1,11 @@
 ﻿@inject IAuthenticationService AuthenticationService
 @inject IStreamingService StreamingService
 
-
-<video id="livestreamVideo" autoplay muted playsinline></video>
-
 <button @onclick="StartStreaming" disabled="@StreamingService.IsStreaming">Start Streaming</button>
 <button @onclick="StopStreaming" disabled="@(!StreamingService.IsStreaming)">Stop Streaming</button>
 
-<input type="checkbox" @bind="audio" /> Record Audio?
-
 @code {
     private string userId = "";
-    private bool audio = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -20,7 +14,7 @@
 
     private async Task StartStreaming()
     {
-        await StreamingService.StartStreaming(userId, audio);
+        await StreamingService.StartStreaming(userId);
         StateHasChanged();
     }
 
