@@ -1,8 +1,8 @@
 ﻿@page "/"
 @inject IStreamingService StreamingService
-@inject IInstagramService InstagramService
+@inject IUserScrollingService UserScrollingService
 
-<div class="container-fluid text-center" @onwheel="OnScroll">
+<div class="container-fluid text-center">
     <div class="row">
         @if (SelectedUser != null)
         {
@@ -37,93 +37,49 @@
 </div>
 
 @code {
-    private List<InstagramUser>? Users { get; set; }
     private InstagramUser? SelectedUser { get; set; }
-    private int CurrentUserIndex { get; set; } = 0;
-    public string? ErrorMessage { get; set; }
     private bool isUserStreaming = false;
+    public string? ErrorMessage { get; set; }
 
-    [CascadingParameter] public string? SelectedUsername { get; set; }
-    [CascadingParameter] public Action<string>? SetSelectedUsername { get; set; }
-
-    protected async override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            ErrorMessage = "Loading...";
-
-            var users = await InstagramService.GetUsersWithMediaAsync();
-
-            if (users != null && users.Any())
-            {
-                Users = users.ToList();
-                SelectedUser = Users[CurrentUserIndex];
-                SetSelectedUsername?.Invoke(SelectedUser.InstagramUsername);
-                await UpdateIsUserStreaming();
-            }
-
-            ErrorMessage = null;
-        }
-        catch
-        {
-            ErrorMessage = "Failed to retrieve data.";
-        }
-
-        // Subscribe to streaming events
+        
+        UserScrollingService.OnUserChanged += OnUserChanged;
+        SelectedUser = UserScrollingService.SelectedUser;
         StreamingService.OnActiveStreamsUpdated += OnActiveStreamsUpdated;
+        await UpdateIsUserStreaming();
+    }
+
+    private async void OnUserChanged()
+    {
+        SelectedUser = UserScrollingService.SelectedUser;
+        await UpdateIsUserStreaming();
+        StateHasChanged();
     }
 
     private async Task UpdateIsUserStreaming()
     {
         var activeStreams = await StreamingService.GetActiveStreamsAsync();
         isUserStreaming = SelectedUser != null && activeStreams.Contains(SelectedUser.Id);
-        StateHasChanged();
     }
 
     private void OnActiveStreamsUpdated(List<string> streams)
     {
-        isUserStreaming = SelectedUser != null && streams.Contains(SelectedUser.Id);
-        StateHasChanged();
-    }
-
-    private async Task OnScroll(WheelEventArgs e)
-    {
-        if (e.DeltaY > 0) // Scrolling down
+        if (SelectedUser != null)
         {
-            LoadNextUser();
-        }
-        else if (e.DeltaY < 0) // Scrolling up
-        {
-            LoadPreviousUser();
-        }
+            bool wasStreaming = isUserStreaming;
+            isUserStreaming = streams.Contains(SelectedUser.Id);
 
-        await UpdateIsUserStreaming();
-    }
-
-    private void LoadNextUser()
-    {
-        if (Users != null && CurrentUserIndex < Users.Count - 1)
-        {
-            CurrentUserIndex++;
-            SelectedUser = Users[CurrentUserIndex];
-            SetSelectedUsername?.Invoke(SelectedUser.InstagramUsername);
-            StateHasChanged();
-        }
-    }
-
-    private void LoadPreviousUser()
-    {
-        if (Users != null && CurrentUserIndex > 0)
-        {
-            CurrentUserIndex--;
-            SelectedUser = Users[CurrentUserIndex];
-            SetSelectedUsername?.Invoke(SelectedUser.InstagramUsername);
-            StateHasChanged();
+            if (isUserStreaming != wasStreaming)
+            {
+                InvokeAsync(StateHasChanged);
+            }
         }
     }
 
     public void Dispose()
     {
+        UserScrollingService.OnUserChanged -= OnUserChanged;
         StreamingService.OnActiveStreamsUpdated -= OnActiveStreamsUpdated;
     }
 }
