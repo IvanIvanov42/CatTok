@@ -23,6 +23,7 @@ builder.Services.AddHttpClient("CatTokAPI")
 builder.Services.AddScoped<AuthenticationState>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IInstagramService, InstagramService>();
+builder.Services.AddScoped<IUserScrollingService, UserScrollingService>();
 
 builder.Services.AddSingleton<IStreamingService, StreamingService>();
 

@@ -1,20 +1,21 @@
 ﻿@inherits LayoutComponentBase
 
-<CascadingValue Value="SelectedUsername">
-    <CascadingValue Value="(Action<string>)SetSelectedUsername">
-        <div class="d-flex justify-content-between align-items-center pt-2 px-5 mb-0">
-            <div><a href="/"><img src="./img/Logo.png" style="width:56px" /></a></div>
-            <div><a href="https://instagram.com/@SelectedUsername" style="text-decoration:none">@@@SelectedUsername</a></div>
-            <div @onclick="@(() => Modal.Show<Information>(options))">
-                <img src="img/info.svg" style="width:36px; height:auto;" />
-            </div>
-        </div>
+@inject IJSRuntime JS
+@inject IUserScrollingService UserScrollingService
 
-        <main class="px-5 py-2">
-            @Body
-        </main>
-    </CascadingValue>
-</CascadingValue>
+<div @onwheel="OnScroll" style="overflow-y: auto; height: 100vh;" @ref="mainLayoutRef">
+    <div class="d-flex justify-content-between align-items-center pt-2 px-5 mb-0">
+        <div><a href="/"><img src="./img/Logo.png" style="width:56px" /></a></div>
+        <div><a href="https://instagram.com/@SelectedUsername" style="text-decoration:none">@@@SelectedUsername</a></div>
+        <div @onclick="@(() => Modal.Show<Information>(options))">
+            <img src="img/info.svg" style="width:36px; height:auto;" />
+        </div>
+    </div>
+
+    <main class="px-5 py-2">
+        @Body
+    </main>
+</div>
 
 @code {
     [CascadingParameter] public IModalService Modal { get; set; } = default!;
@@ -26,9 +27,62 @@
         };
     public string SelectedUsername { get; set; }
 
-    private void SetSelectedUsername(string username)
+    private ElementReference mainLayoutRef;
+
+    protected override async Task OnInitializedAsync()
     {
-        SelectedUsername = username;
+        await UserScrollingService.InitializeAsync();
+        UpdateSelectedUsername();
+        UserScrollingService.OnUserChanged += UpdateSelectedUsername;
+    }
+
+    private void UpdateSelectedUsername()
+    {
+        SelectedUsername = UserScrollingService.SelectedUser?.InstagramUsername ?? string.Empty;
         StateHasChanged();
+    }
+
+    private async Task OnScroll(WheelEventArgs e)
+    {
+        var scrollInfo = await JS.InvokeAsync<ScrollInfo>("getScrollInfo", mainLayoutRef);
+
+        // Scrolling down
+        if (e.DeltaY > 0)
+        {
+            if (scrollInfo.scrollTop + scrollInfo.clientHeight >= scrollInfo.scrollHeight - 1)
+            {
+                if (UserScrollingService.HasNextUser)
+                {
+                    var userChanged = UserScrollingService.LoadNextUser();
+                    if (userChanged)
+                    {
+                        await JS.InvokeVoidAsync("scrollToTop", mainLayoutRef);
+                    }
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("scrollToBottom", mainLayoutRef);
+                }
+            }
+        }
+        // Scrolling up
+        else if (e.DeltaY < 0)
+        {
+            if (scrollInfo.scrollTop <= 0)
+            {
+                if (UserScrollingService.HasPreviousUser)
+                {
+                    var userChanged = UserScrollingService.LoadPreviousUser();
+                    if (userChanged)
+                    {
+                        await JS.InvokeVoidAsync("scrollToBottom", mainLayoutRef);
+                    }
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("scrollToTop", mainLayoutRef);
+                }
+            }
+        }
     }
 }
