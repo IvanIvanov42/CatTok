@@ -1,13 +1,26 @@
 ﻿@implements IAsyncDisposable
 @inject IStreamingService StreamingService
 @inject IJSRuntime JSRuntime
+@inject IAuthenticationService AuthenticationService
 
-<video id="remoteVideo" autoplay playsinline></video>
+<div>
+    @if (isOwnStream)
+    {
+        <p>You are currently streaming.</p>
+        <video id="livestreamVideo" autoplay playsinline muted style="width: 100%;"></video>
+    }
+    else
+    {
+        <video id="remoteVideo" autoplay playsinline muted style="width: 100%;"></video>
+    }
+</div>
 
 @code {
     [Parameter] public string StreamerId { get; set; }
 
     private bool isViewing = false;
+    private bool isOwnStream = false;
+    private string currentUserId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -16,11 +29,18 @@
         // Set the .NET reference for JavaScript interop
         var objRef = DotNetObjectReference.Create(this);
         await JSRuntime.InvokeVoidAsync("streamingFunctions.setDotNetReference", objRef);
+
+        currentUserId = await AuthenticationService.GetUserIdAsync();
+
+        isOwnStream = currentUserId == StreamerId;
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        await StartViewing();
+        if (!isOwnStream)
+        {
+            await StartViewing();
+        }
     }
 
     private async Task StartViewing()
@@ -38,7 +58,7 @@
             await StopViewing();
             return;
         }
-        
+
         // Already viewing the current streamer
         if (isViewing && StreamingService.CurrentStreamerId == StreamerId)
         {
