@@ -1,53 +1,75 @@
 ﻿@page "/"
 @inject IStreamingService StreamingService
 @inject IUserScrollingService UserScrollingService
+@inject IJSRuntime JSRuntime
 
 <div class="container-fluid text-center">
-    <div class="row">
-        @if (SelectedUser != null)
+    @if (SelectedUser != null)
+    {
+        if (isUserStreaming)
         {
-            if (isUserStreaming)
+            if (IsMobile)
             {
                 <div class="row">
                     <div class="col-md-4">
-                        <MediaDisplay Medias="@SelectedUser.Medias.Take(SelectedUser.Medias.Count / 2).ToList()" />
+                        <MediaDisplay Medias="@SelectedUser.Medias.Take(SelectedUser.Medias.Count / 2).ToList()" IsLivestreaming="true" />
                     </div>
                     <div class="col-md-4">
-                        <Viewer StreamerId="@SelectedUser.Id" />
+                        <Viewer StreamerId="@SelectedUser.Id" AutoJoin="true" />
                     </div>
                     <div class="col-md-4">
-                        <MediaDisplay Medias="@SelectedUser.Medias.Skip(SelectedUser.Medias.Count / 2).ToList()" />
+                        <MediaDisplay Medias="@SelectedUser.Medias.Skip(SelectedUser.Medias.Count / 2).ToList()" IsLivestreaming="true" />
                     </div>
                 </div>
             }
             else
             {
-                <div class="row">
-                    <div class="col-md-12">
-                        <MediaDisplay Medias="@SelectedUser.Medias" />
-                    </div>
-                </div>
+                <MediaDisplay Medias="@SelectedUser.Medias" IsLivestreaming="false" />
             }
         }
         else
         {
-            <p>@ErrorMessage</p>
+            <div class="row">
+                <div class="col-md-12">
+                    <MediaDisplay Medias="@SelectedUser.Medias" IsLivestreaming="false" />
+                </div>
+            </div>
         }
-    </div>
+    }
+    else
+    {
+        <p>@ErrorMessage</p>
+    }
 </div>
 
+@if (isUserStreaming || IsMobile)
+{
+    <button class="livestream-button" @onclick="ShowLivestreamModal">
+        <img src="./img/LiveStreamButton.svg" />
+    </button>
+}
+
 @code {
+    [CascadingParameter] public IModalService Modal { get; set; } = default!;
     private InstagramUser? SelectedUser { get; set; }
     private bool isUserStreaming = false;
     public string? ErrorMessage { get; set; }
 
+    private bool IsMobile { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
-        
+        await CheckDevice();
+
         UserScrollingService.OnUserChanged += OnUserChanged;
         SelectedUser = UserScrollingService.SelectedUser;
         StreamingService.OnActiveStreamsUpdated += OnActiveStreamsUpdated;
         await UpdateIsUserStreaming();
+    }
+
+    private async Task CheckDevice()
+    {
+        IsMobile = await JSRuntime.InvokeAsync<bool>("isMobileDevice");
     }
 
     private async void OnUserChanged()
@@ -75,6 +97,24 @@
                 InvokeAsync(StateHasChanged);
             }
         }
+    }
+
+    private void ShowLivestreamModal()
+    {
+        if (SelectedUser == null)
+            return;
+
+        ModalOptions options = new ModalOptions()
+        {
+            Size = ModalSize.Large,
+            HideCloseButton = true,
+            HideHeader = true
+        };
+
+        var parameters = new ModalParameters();
+        parameters.Add("StreamerId", SelectedUser.Id);
+
+        Modal.Show<LivestreamModal>("Cat", parameters, options);
     }
 
     public void Dispose()
