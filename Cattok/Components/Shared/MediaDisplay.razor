@@ -1,6 +1,6 @@
 ﻿@inject IJSRuntime JS
 
-<div class="masonry">
+<div class="@(IsLivestreaming ? "masonry masonry-live" : "masonry")">
     @foreach (var media in Medias)
     {
         @if (media.MediaType == "IMAGE")
@@ -15,6 +15,9 @@
 @code {
     [Parameter]
     public IEnumerable<Media>? Medias { get; set; } = Enumerable.Empty<Media>();
+
+    [Parameter]
+    public bool IsLivestreaming { get; set; } = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

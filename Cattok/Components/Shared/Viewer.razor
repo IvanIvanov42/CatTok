@@ -16,7 +16,11 @@
 </div>
 
 @code {
-    [Parameter] public string StreamerId { get; set; }
+    [Parameter]
+    public bool AutoJoin { get; set; } = false;
+
+    [Parameter] 
+    public string StreamerId { get; set; }
 
     private bool isViewing = false;
     private bool isOwnStream = false;
@@ -37,7 +41,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        if (!isOwnStream)
+        if (!isOwnStream && AutoJoin)
         {
             await StartViewing();
         }
@@ -96,7 +100,6 @@
     public async Task SendAnswerToServer(string streamerId, string answer)
     {
         await StreamingService.SendAnswerAsync(streamerId, answer);
-        Console.WriteLine("SENDANDSWERTOSERVER: " + streamerId);
     }
 
     public async ValueTask DisposeAsync()
