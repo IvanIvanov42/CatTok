@@ -1,0 +1,12 @@
+﻿@inject IAuthenticationService AuthenticationService
+@inject NavigationManager NavigationManager
+
+<button @onclick="LogoutAsync" class="btn btn-link">Logout</button>
+
+@code {
+    private async Task LogoutAsync()
+    {
+        await AuthenticationService.LogoutAsync();
+        NavigationManager.NavigateTo("/", true);
+    }
+}
