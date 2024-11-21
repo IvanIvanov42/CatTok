@@ -28,12 +28,28 @@
     public string SelectedUsername { get; set; }
 
     private ElementReference mainLayoutRef;
+    private DotNetObjectReference<MainLayout>? _objRef;
 
     protected override async Task OnInitializedAsync()
     {
         await UserScrollingService.InitializeAsync();
         UpdateSelectedUsername();
         UserScrollingService.OnUserChanged += UpdateSelectedUsername;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _objRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("initializeInteractionListeners", _objRef);
+        }
+    }
+
+    private async Task LogoutAsync()
+    {
+        await AuthenticationService.LogoutAsync();
+        NavigationManager.NavigateTo("/", true);
     }
 
     private void UpdateSelectedUsername()
@@ -83,6 +99,49 @@
                     await JS.InvokeVoidAsync("scrollToTop", mainLayoutRef);
                 }
             }
+        }
+    }
+
+    [JSInvokable("OnSwipeUp")]
+    public async Task OnSwipeUp()
+    {
+        if (UserScrollingService.HasNextUser)
+        {
+            var userChanged = UserScrollingService.LoadNextUser();
+            if (userChanged)
+            {
+                await JS.InvokeVoidAsync("scrollToTop", mainLayoutRef);
+            }
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("scrollToBottom", mainLayoutRef);
+        }
+    }
+
+    [JSInvokable("OnSwipeDown")]
+    public async Task OnSwipeDown()
+    {
+        if (UserScrollingService.HasPreviousUser)
+        {
+            var userChanged = UserScrollingService.LoadPreviousUser();
+            if (userChanged)
+            {
+                await JS.InvokeVoidAsync("scrollToBottom", mainLayoutRef);
+            }
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("scrollToTop", mainLayoutRef);
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_objRef != null)
+        {
+            JS.InvokeVoidAsync("removeInteractionListeners");
+            _objRef.Dispose();
         }
     }
 }
