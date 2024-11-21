@@ -55,6 +55,7 @@ namespace CatTok.Services
 
             await _localStorageService.RemoveItemAsync(JWT_KEY);
             await _localStorageService.RemoveItemAsync(REFRESH_KEY);
+            await _localStorageService.RemoveItemAsync("username");
 
             _jwtCache = null;
 
@@ -107,10 +108,11 @@ namespace CatTok.Services
             if (content == null)
                 throw new InvalidDataException("Invalid response from login.");
 
+            var username = await GetUsernameAsync();
+
             await _localStorageService.SetItemAsync(JWT_KEY, content.JwtToken);
             await _localStorageService.SetItemAsync(REFRESH_KEY, content.RefreshToken);
-
-            var username = await GetUsernameAsync();
+            await _localStorageService.SetItemAsStringAsync("username", username);
             _authenticationState.SetUser(username);
 
             LoginChange?.Invoke(username);
