@@ -4,6 +4,7 @@ Welcome to CatTok, an awesome website for all cat lovers! Here, you can explore 
 
 ## Features 🐾
 
+- **Livestreaming:** P2P livestreaming system utilizing the WebRTC protocol. Frontend and backend communication established via SignalR
 - **User Registration/Login System:** Securely sign up and log in to CatTok.
 - **Instagram Authentication:** Connect your Instagram account to display your cat pictures on CatTok.
 - **Explore Cats:** Browse through various cat profiles and enjoy their pictures.
