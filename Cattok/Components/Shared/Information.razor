@@ -15,13 +15,10 @@
         </p>
 
         <div>
-            @if (AuthenticationState.IsLoggedIn)
+            @if (isInstagramConnected)
             {
-                if (isInstagramConnected)
-                {
-                    <p>Hi @username</p>
-                    <p>Your cat's Instagram is connected!</p>
-                    <p>meow @instagramUsername</p>
+                <p>Meow @username,</p>
+                <p>Your cat's Instagram - @instagramUsername, is connected!</p>
                     <button class="btn btn-outline-dark btn-lg" type="button" @onclick="DisconnectInstagram">Disconnect</button>
                     <p>Livestream your cat now!</p>
                     <Streaming />
@@ -33,31 +30,18 @@
                     <li>Connect your cat’s IG account!</li>
                     <li>Use a spare phone to showcase your cat!</li>
                 </ul>
+                @if (AuthenticationState.IsLoggedIn)
+                {
                 <div class="row justify-content-center" style="margin-top: 60px;">
                     <button class="btn btn-outline-dark btn-lg" type="button" @onclick="CallInstagram">Connect</button>
                 </div>
             }
-            }
-            else
-            {
-                <p>Please log in to connect your cat!</p>
-                <Login />
-                <p>No account?</p>
-                <div @onclick="@(() => Modal.Show<Register>(options))">SIGN UP</div>
             }
         </div>
     </div>
 </div>
 
 @code {
-    [CascadingParameter] public IModalService Modal { get; set; } = default!;
-    ModalOptions options = new ModalOptions()
-        {
-            Size = ModalSize.Large,
-            HideCloseButton = true,
-            HideHeader = true
-        };
-
     private bool isInstagramConnected;
     private string? instagramUsername;
     private string? username;

@@ -8,16 +8,16 @@
     {
         if (isUserStreaming)
         {
-            if (IsMobile)
+            if (!IsMobile)
             {
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <MediaDisplay Medias="@SelectedUser.Medias.Take(SelectedUser.Medias.Count / 2).ToList()" IsLivestreaming="true" />
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <Viewer StreamerId="@SelectedUser.Id" AutoJoin="true" />
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <MediaDisplay Medias="@SelectedUser.Medias.Skip(SelectedUser.Medias.Count / 2).ToList()" IsLivestreaming="true" />
                     </div>
                 </div>
@@ -42,7 +42,7 @@
     }
 </div>
 
-@if (isUserStreaming || IsMobile)
+@if (isUserStreaming && IsMobile)
 {
     <button class="livestream-button" @onclick="ShowLivestreamModal">
         <img src="./img/LiveStreamButton.svg" />
