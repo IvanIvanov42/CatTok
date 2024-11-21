@@ -18,24 +18,21 @@
     width: 33.33%; /* 3 columns */
 }
 
+@media (max-width: 1650px) {
+    .masonry.masonry-live .masonry-item {
+        width: 50%; /* 2 columns */
+    }
+}
+
 @media (max-width: 1500px) {
     .masonry:not(.masonry-live) .masonry-item {
         width: 20%; /* 5 columns */
-    }
-
-    .masonry.masonry-live .masonry-item {
-        width: 33.33%; /* 3 columns */
     }
 }
 
 @media (max-width: 1200px) {
     .masonry:not(.masonry-live) .masonry-item {
         width: 25%; /* 4 columns */
-    }
-
-
-    .masonry.masonry-live .masonry-item {
-        width: 33.33%; /* 3 columns */
     }
 }
 

@@ -2,13 +2,30 @@
 
 @inject IJSRuntime JS
 @inject IUserScrollingService UserScrollingService
+@inject AuthenticationState AuthenticationState
+@inject IAuthenticationService AuthenticationService
+@inject NavigationManager NavigationManager
 
 <div @onwheel="OnScroll" style="overflow-y: auto; height: 100vh;" @ref="mainLayoutRef">
     <div class="d-flex justify-content-between align-items-center pt-2 px-5 mb-0">
         <div><a href="/"><img src="./img/Logo.png" style="width:56px" /></a></div>
         <div><a href="https://instagram.com/@SelectedUsername" style="text-decoration:none">@@@SelectedUsername</a></div>
-        <div @onclick="@(() => Modal.Show<Information>(options))">
-            <img src="img/info.svg" style="width:36px; height:auto;" />
+        <div class="row">
+            <div class="col" @onclick="@(() => Modal.Show<Information>(options))">
+                <img src="img/info.svg" style="width:36px; height:auto; cursor: pointer;" />
+            </div>
+            @if (AuthenticationState.IsLoggedIn)
+            {
+                <div class="col" @onclick="LogoutAsync">
+                    <img src="img/Logout.png" style="width:36px; height:auto; cursor: pointer;" />
+                </div>
+            }
+            else
+            {
+                <div class="col" @onclick="@(() => Modal.Show<UserAuth>(options))">
+                    <img src="img/Login.png" style="width:36px; height:auto; cursor: pointer;" />
+                </div>
+            }
         </div>
     </div>
 
