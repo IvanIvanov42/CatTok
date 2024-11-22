@@ -12,18 +12,18 @@
         <div><a href="https://instagram.com/@SelectedUsername" style="text-decoration:none">@@@SelectedUsername</a></div>
         <div class="row">
             <div class="col" @onclick="@(() => Modal.Show<Information>(options))">
-                <img src="img/info.svg" style="width:22px; height:auto; cursor: pointer;" />
+                <img src="img/info.svg" class="nav-icon" />
             </div>
             @if (AuthenticationState.IsLoggedIn)
             {
                 <div class="col" @onclick="LogoutAsync">
-                    <img src="img/Logout.png" style="width:36px; height:auto; cursor: pointer;" />
+                    <img src="img/Logout.png" class="nav-icon" />
                 </div>
             }
             else
             {
                 <div class="col" @onclick="@(() => Modal.Show<UserAuth>(options))">
-                    <img src="img/Login.png" style="width:36px; height:auto; cursor: pointer;" />
+                    <img src="img/Login.png" class="nav-icon" />
                 </div>
             }
         </div>

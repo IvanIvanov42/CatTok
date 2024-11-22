@@ -4,7 +4,13 @@
 @inject IJSRuntime JSRuntime
 
 <div class="container-fluid text-center">
-    @if (SelectedUser != null)
+    @if (IsLoading)
+    {
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    }
+    else if (SelectedUser != null)
     {
         if (isUserStreaming)
         {
@@ -55,16 +61,21 @@
     private bool isUserStreaming = false;
     public string? ErrorMessage { get; set; }
 
+    private bool IsLoading { get; set; } = true;
     private bool IsMobile { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
+        IsLoading = true;
         await CheckDevice();
 
         UserScrollingService.OnUserChanged += OnUserChanged;
         SelectedUser = UserScrollingService.SelectedUser;
         StreamingService.OnActiveStreamsUpdated += OnActiveStreamsUpdated;
         await UpdateIsUserStreaming();
+
+        IsLoading = false;
+        StateHasChanged();
     }
 
     private async Task CheckDevice()
