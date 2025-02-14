@@ -2,6 +2,8 @@
 
 Welcome to CatTok, an awesome website for all cat lovers! Here, you can explore and share beautiful cat pictures, follow your favorite cats on Instagram, and connect with other cat enthusiasts.
 
+## Instagram want business information for their login API, project on hiatus. https://cattoka.azurewebsites.net/
+
 ## Features 🐾
 
 - **Livestreaming:** P2P livestreaming system utilizing the WebRTC protocol. Frontend and backend communication established via SignalR
@@ -15,9 +17,7 @@ Welcome to CatTok, an awesome website for all cat lovers! Here, you can explore 
 - **Azure Key Vault:** Secure management of keys in the backend using Azure Key Vault.
 
 ## Links 🐾
-[CatTok API w/ Swagger docs](https://cattok-api20240515235936.azurewebsites.net/)
-
-[CatTok Frontend](https://cattoka.azurewebsites.net/)
+[CatTok Frontend](https://cattoka.azurewebsites.net/) - Loads slowly as all content is hosted on free tiers.
 
 ## License 🐾
 
